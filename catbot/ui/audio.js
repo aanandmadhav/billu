@@ -276,10 +276,18 @@ export class AudioController {
       if (captureEpoch !== this.captureEpoch) return false;
       this.recording = false;
       this.cleanupCapture();
+      const messages = {
+        NotAllowedError: window.catbotDesktop
+          ? "Microphone access is blocked. In Full dashboard, open Permissions, then Enable microphone. Restart Catbot after granting access."
+          : "Microphone access is blocked. Allow it in your browser's site settings, then try again.",
+        NotFoundError:
+          "No microphone was found. Connect one and check System Settings → Sound → Input.",
+        NotReadableError:
+          "The microphone is unavailable. Check your selected sound input and close any app holding it.",
+      };
       this.notice(
-        error.name === "NotAllowedError"
-          ? "Microphone access was declined. Open Permissions to enable it, or type below."
-          : "The microphone could not start. You can type below.",
+        messages[error.name] ||
+          "The microphone could not start. Check your sound input, or type below.",
       );
       return false;
     }

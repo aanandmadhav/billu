@@ -83,7 +83,7 @@ choices take precedence over the law's defaults. No marketing template was added
 | Reduced motion | Global reduced-motion tokens disable animations and transitions; pupil follow is explicitly disabled. No content depends on animation. |
 | Authored motion, not lifeless | Billu changes eyes, ears, head, tail, raised paw and tape with actual stage/mood/mime events; microphone rings respond to RMS level. |
 | Accessible feedback and errors | Visible text accompanies stage color. Denial uses alert semantics, final transcript is polite live content, dialogs are named, input has a label, focus is visible, and error/result states remain truthful. |
-| Keyboard/touch | Space is excluded in text fields; Cmd/Ctrl K focuses input. Petting supports held Enter or Space. Primary controls meet 44px targets. PTT releases tracks and stops on blur/timeout/disconnection. |
+| Keyboard/touch | Space is excluded in text fields; Cmd/Ctrl K focuses input. Petting supports held Enter; Space is reserved for push-to-talk outside text fields and dialogs. Primary controls meet 44px targets. PTT releases tracks and stops on blur/timeout/disconnection. |
 | Responsive layout | Source reviewed for 375px, tablet and desktop breakpoints. Pipeline overflow is internal; code wraps. Actual 375px overflow and tap-target measurement remain open. |
 | Indic fallback | Local Latin fonts retain Nirmala UI/Kohinoor Devanagari fallbacks. The Hindi command is covered by text/voice routing tests; actual glyph rasterization remains open. |
 
@@ -199,3 +199,18 @@ because native computer access was previously rejected.
 For this follow-up, two native Catbot inspection attempts timed out (30s and
 20s). The packaged fake-mode Electron startup still passed with renderer audio
 connected and system-speech completion. No pixel or pointer results are claimed.
+
+
+## Push-to-talk keyboard follow-up
+
+The focused view button previously received native Space activation because the
+global shortcut excluded all buttons. Capture-phase handlers now reserve Space
+for recording outside text-entry controls and dialogs, cancelling the default
+on both key events. Enter remains available for activating regular buttons and
+petting Billu. Key repeat cannot toggle the view or start multiple recordings.
+Mic startup and early cancellation have immediate visible text; microphone
+capture can proceed even if pointer capture fails. Pending requests cannot
+repaint the control as listening after release. The existing geometry, contrast,
+target sizes and motion remain unchanged. Tests cover focused-mode-button Space,
+normal typing/dialog shortcuts, pointer failure/cancel and delayed startup.
+Physical microphone capture and native pointer checks are not claimed.

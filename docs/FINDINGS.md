@@ -264,3 +264,16 @@ rather than inventing any element requested by the test. It failed before this
 fix and passes after it. Mode initialization failures also surface a visible
 message instead of leaving a silently inactive control. Rebuilding alone did
 not resolve the original missing-element error.
+
+
+## Space activated the view button instead of recording
+
+The user reported that holding Space changed simple/dashboard mode. The global
+shortcut excluded all buttons, allowing the focused view toggle's native Space
+click. The input controller now captures Space keydown and keyup outside text
+fields/dialogs and cancels the native activation, while keeping Enter for regular
+button activation. It displays microphone startup/cancellation immediately and
+handles pointer-capture failure without skipping recording. Regression tests
+exercise both key events with the mode button focused. Actual OS microphone
+permission and physical capture are still separate from this verified input
+routing fix.

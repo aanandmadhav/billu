@@ -155,3 +155,50 @@ test("release while audio is unlocking does not open the microphone later", asyn
   assert.equal(await pending, false);
   assert.equal(requests.length, 0);
 });
+
+test("a blocked microphone reports how to enable it from simple mode", async () => {
+  global.window = global;
+  global.catbotDesktop = {};
+  global.location = { protocol: "http:", host: "127.0.0.1:1234" };
+  global.speechSynthesis = { cancel() {} };
+  global.WebSocket = class {
+    static OPEN = 1;
+    constructor() {
+      this.readyState = 1;
+    }
+    send() {}
+  };
+  global.AudioContext = class {
+    constructor() {
+      this.state = "running";
+    }
+    async resume() {}
+  };
+  Object.defineProperty(global, "navigator", {
+    configurable: true,
+    value: {
+      mediaDevices: {
+        getUserMedia: async () => {
+          throw Object.assign(new Error("Denied"), { name: "NotAllowedError" });
+        },
+      },
+    },
+  });
+  const source = fs.readFileSync(
+    path.resolve(__dirname, "../../catbot/ui/audio.js"),
+    "utf8",
+  );
+  const { AudioController } = await import(
+    "data:text/javascript;base64," + Buffer.from(source).toString("base64")
+  );
+  const notices = [];
+  const audio = new AudioController((message) => notices.push(message));
+  audio.fake = false;
+  assert.equal(await audio.start(), false);
+  assert.equal(audio.recording, false);
+  assert.match(
+    notices.at(-1),
+    /Full dashboard.*Permissions.*Enable microphone/,
+  );
+  delete global.catbotDesktop;
+});

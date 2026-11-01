@@ -12,6 +12,8 @@ def test_local_dashboard_and_assets():
             "tokens.css",
             "app.js",
             "audio.js",
+            "push-to-talk.js",
+            "view-mode.js",
             "icons.js",
             "cat.svg",
             "fonts/gloock.woff2",

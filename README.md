@@ -46,7 +46,7 @@ fonts are local; no CDN, npm build or internet font request is needed.
 python -m catbot --serve
 ```
 
-Visit **http://127.0.0.1:8765**. The server binds to loopback only. Voice enables when you send a command, or click **Voice on** first. Hold **Space** or the talk button to record; release to submit.
+Visit **http://127.0.0.1:8765**. The server binds to loopback only. Voice enables when you send a command, or click **Voice on** first. Hold **Space** outside a text field or dialog, or hold the microphone button, to record; release to submit. Space remains push-to-talk when the mode button is focused. Use Enter to activate focused buttons. Hold Enter on Billu to pet him.
 The browser asks for microphone permission. Typing always works. `Cmd/Ctrl K`
 focuses the command input. A new talk press interrupts Billu's current playback.
 
