@@ -64,6 +64,7 @@
    <div class="cat-copy"><p id="state-headline" class="state-headline">Kya hai?</p><p class="speech" id="speech" aria-live="polite">Bolo jaldi. Chai thandi ho rahi hai.</p></div>
    <div class="companion-actions"><span id="pet-hint">Hold Billu for 2 seconds to pet</span><button id="treat"><span data-icon="chai"></span>Give chai</button></div>
    <p class="transcript" id="transcript" aria-live="polite">Your next command goes here.</p>
+   <a id="screenshot-open" hidden target="_blank" rel="noopener">View screenshot</a>
    <div id="simple-feedback" class="simple-feedback"></div>
    <form id="command-form" class="command-bar">
     <label for="utterance">Type a command</label>
@@ -80,9 +81,10 @@
    <p>Follow the system prompts to let Billu hear you and use desktop controls. You can keep typing while permissions are pending.</p>
    <div class="permission-rows">
     <div><strong>Microphone</strong><span id="mic-status">Checking…</span><button id="allow-microphone">Enable microphone</button></div>
+    <div><strong>Screen capture</strong><span id="screen-status">Checking…</span><button id="allow-screen">Enable screenshots</button></div>
     <div><strong>Accessibility</strong><span id="accessibility-status">Checking…</span><button id="allow-accessibility">Enable system control</button></div>
    </div>
-   <p id="output-status" role="status"></p><button id="restore-sound" hidden>Restore sound</button><p class="setup-note">If macOS has denied a permission before, the button opens its System Settings page. Enable Catbot there, then return and check again. A microphone change may need an app restart.</p>
+   <p id="output-status" role="status"></p><button id="restore-sound" hidden>Restore sound</button><p class="setup-note">If macOS has denied a permission before, the button opens its System Settings page. Enable Catbot there, then return and check again. Microphone or screen-capture changes may need an app restart.</p>
    <button id="permissions-refresh">Check permissions again</button>
   </section>
   <section class="pipeline panel" aria-labelledby="pipeline-title"><div class="section-head"><h2 id="pipeline-title"><span class="numeral">01</span>Pipeline</h2><span id="step">Waiting for you</span></div><div class="rail" id="rail" aria-label="Request stages"></div><div class="latency"><p id="pipeline-note">One request. Every action checked.</p><p><strong id="latency">0</strong><span>ms</span></p></div></section>

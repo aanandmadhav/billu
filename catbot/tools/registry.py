@@ -27,6 +27,10 @@ class CodeArgs(Args):
     spec: str = Field(min_length=1, max_length=4000)
 
 
+class ScreenshotArgs(Args):
+    pass
+
+
 class SearchArgs(Args):
     query: str = Field(min_length=1, max_length=500)
 
@@ -36,8 +40,10 @@ REGISTRY = {
     "set_volume": VolumeArgs,
     "write_code": CodeArgs,
     "web_search": SearchArgs,
+    "take_screenshot": ScreenshotArgs,
 }
 DESCRIPTIONS = {
+    "take_screenshot": "Capture the main display as a local PNG in sandbox/captures. Use for taking a screenshot, not for moving old screenshot files. No arguments. Never use shell commands for screen capture.",
     "run_command": "One short sandbox-only command. Prefer ls, cat, mkdir, touch, mv, cp or echo. Use relative paths. Trash screenshots by moving into .Trash. No scripts, network, credentials or source-tree access.",
     "set_volume": "Set system volume. Actions up/down change by ten. mute or set level=0 silences; unmute restores.",
     "write_code": "Build a small app in the background. Use a short lowercase slug and a one-paragraph English spec. Files stay in sandbox.",

@@ -214,3 +214,16 @@ repaint the control as listening after release. The existing geometry, contrast,
 target sizes and motion remain unchanged. Tests cover focused-mode-button Space,
 normal typing/dialog shortcuts, pointer failure/cancel and delayed startup.
 Physical microphone capture and native pointer checks are not claimed.
+
+
+## Screenshot follow-up
+
+Reviewed the design-law points for the added Screen capture permission row and
+View screenshot link. They reuse the existing typography, control sizing, spacing
+and native setup patterns with no new decorative surfaces or motion. The link is
+hidden only until a real successful capture produces a validated local capture
+ID; its 44px target is available in both full and simple views. The PNG preview
+uses an isolated native window with no preload or media privileges. Permission
+failures remain visible and do not claim capture success. Pointer/pixel checks
+remain unverified; actual voice input and permission-failure handling have live
+application evidence.

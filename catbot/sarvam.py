@@ -71,6 +71,10 @@ class FakeSarvam:
                     "spec": "Build a chai counter with working plus, minus and reset buttons and local storage. Plain HTML, CSS, JS.",
                 },
             )
+        elif "screenshot" in text and not any(
+            word in text for word in ("trash", "purani", "old", "move", "delete")
+        ):
+            name, args = "take_screenshot", {}
         elif "screenshot" in text or "trash" in text:
             name, args = "run_command", {"command": "mv screenshots/*.png .Trash/"}
         elif any(w in text for w in ("delete", "mita", "हटा", "डिलीट")):

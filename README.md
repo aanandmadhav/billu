@@ -176,10 +176,11 @@ The first live launch requests microphone permission and offers the native
 Accessibility approval flow. Click along with the OS prompts. Previously denied
 permissions open their System Settings pages; grant access there and return to
 Catbot. Microphone changes may require restarting the app. **Permissions** reopens
-the setup panel. Camera, screen recording and Full Disk Access are not requested
-because the current tools do not require them. Existing volume and sandbox file
-commands remain the supported system actions; granting Accessibility does not add
-unimplemented mouse/keyboard automation or bypass the safety gate.
+the setup panel. **Enable screenshots** opens Screen & System Audio Recording
+settings. Enable Catbot there and restart it after changing the grant. Camera and
+Full Disk Access are not requested. Existing volume and sandbox file
+commands and main-display screenshots are supported system actions. Granting
+Accessibility does not add unimplemented mouse/keyboard automation or bypass the safety gate.
 
 Voice starts enabled in Electron. **Test voice** speaks a fixed Billu line and
 reports a playback failure instead of pretending it was heard. The setup panel
@@ -204,3 +205,24 @@ means the stream opened but carried no signal: check the selected input in syste
 Sound settings. Empty recordings are now rejected locally; they do not cause a
 Sarvam RuntimeError. Authentication, quota and transcription failures have separate
 messages, and failed captures stop automatically. No recording is saved to disk.
+
+
+## Screenshots
+
+Say or type **Billu, ek screenshot lena**. The dedicated `take_screenshot` tool
+passes through Laya and the policy gate, captures the main display as a PNG and
+saves a unique file in `sandbox/captures/`. **View screenshot** opens the image.
+The image stays local; only its path and dimensions enter the conversation.
+The tool accepts no filename, command or capture flags from the model. Arbitrary
+`screencapture` shell commands remain blocked. Capture is currently macOS-only.
+A failed capture stops immediately with permission help. Fake mode accesses no
+screen and writes no image.
+
+Additional live demo rehearsal:
+
+```bash
+python -m scripts.smoke_demo_live
+```
+
+This uses real Sarvam, Laya and generated TTS, with fake desktop actions and fake
+coding. Real Codex creation is checked separately with `scripts/smoke_code.py`.

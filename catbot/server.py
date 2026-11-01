@@ -2,6 +2,7 @@ import asyncio
 import base64
 import io
 import json
+import re
 import secrets
 import time
 import wave
@@ -283,6 +284,20 @@ def create_app(settings, *, runner=None):
             count=len(corrections),
         )
         return {"ok": True, "count": len(corrections)}
+
+    @app.get("/captures/{capture_id}.png")
+    async def capture(capture_id: str):
+        if settings.fake or not re.fullmatch(r"[a-f0-9]{32}", capture_id):
+            raise HTTPException(404, "Screenshot not found")
+        from catbot.tools.shell import confined_path
+
+        try:
+            image = confined_path(settings.sandbox, f"captures/{capture_id}.png")
+            if not image.is_file():
+                raise HTTPException(404, "Screenshot not found")
+        except ValueError:
+            raise HTTPException(404, "Screenshot not found") from None
+        return FileResponse(image, media_type="image/png", headers={"Cache-Control": "no-store"})
 
     @app.websocket("/events")
     async def events(ws: WebSocket):

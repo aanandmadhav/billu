@@ -395,3 +395,5 @@ body:not(.simple-mode) .simple-feedback {
 .simple-mode.confirming {
   padding-bottom: 0;
 }
+
+#screenshot-open { min-height: 44px; padding: 10px 0; align-self: center; font-size: 14px; }

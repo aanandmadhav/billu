@@ -270,6 +270,7 @@ class Runner:
                         "set_volume": "Change the volume",
                         "write_code": "Build this local app",
                         "web_search": "Run this search",
+                        "take_screenshot": "Capture the main screen into sandbox",
                     }.get(call.tool, call.tool)
                     if not await self.confirm(task_id, CONFIRM.format(action=plain)):
                         self.executor.discard(token)
@@ -283,6 +284,21 @@ class Runner:
                 if muting:
                     await self.persona.say(task_id, LAST_WORDS)
                 result = await self.executor.execute(call, token)
+                if call.tool == "write_code" and result.ok:
+                    # The background job owns progress and completion from here.
+                    self.bus.publish(
+                        task_id, "done", ok=True, stopped_by="complete", background=True
+                    )
+                    return
+                if call.tool == "take_screenshot":
+                    await self.persona.say(task_id, result.summary)
+                    self.bus.publish(
+                        task_id,
+                        "done",
+                        ok=result.ok,
+                        stopped_by="complete" if result.ok else "screenshot_failed",
+                    )
+                    return
                 if call.tool == "set_volume" and result.ok:
                     muted = result.data.get("muted", muting) if result.data else muting
                     was_mime = self.persona.mime

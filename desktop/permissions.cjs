@@ -2,6 +2,8 @@ const { execFile } = require("node:child_process");
 const { promisify } = require("node:util");
 const run = promisify(execFile);
 const PANES = {
+  screen:
+    "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture",
   microphone:
     "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone",
   accessibility:
@@ -15,6 +17,7 @@ class Permissions {
     if (this.fake)
       return {
         microphone: "demo",
+        screen: "demo",
         accessibility: "demo",
         platform: this.platform,
       };
@@ -27,14 +30,24 @@ class Permissions {
           ? "granted"
           : "not-granted"
         : "not-required";
-    return { microphone, accessibility, platform: this.platform };
+    const screen =
+      this.platform === "darwin"
+        ? this.systemPreferences.getMediaAccessStatus("screen")
+        : "not-required";
+    return { microphone, screen, accessibility, platform: this.platform };
   }
   async request(kind, { openSettings = true } = {}) {
-    if (!["microphone", "accessibility"].includes(kind))
+    if (!["microphone", "accessibility", "screen"].includes(kind))
       throw new Error("Unknown permission.");
     if (this.fake) return this.status();
     if (this.platform === "darwin") {
-      if (kind === "microphone") {
+      if (kind === "screen") {
+        if (
+          this.systemPreferences.getMediaAccessStatus("screen") !== "granted" &&
+          openSettings
+        )
+          await this.shell.openExternal(PANES.screen);
+      } else if (kind === "microphone") {
         const status =
           this.systemPreferences.getMediaAccessStatus("microphone");
         if (status === "not-determined")

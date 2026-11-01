@@ -84,6 +84,8 @@ async function start() {
     shell,
     fake: backend.fake,
   });
+  if (process.argv.includes("--diagnostics"))
+    console.log("CATBOT_PERMISSIONS " + JSON.stringify(permissions.status()));
   const onboardingFile = path.join(
     app.getPath("userData"),
     "permissions-requested.json",

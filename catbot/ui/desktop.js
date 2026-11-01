@@ -48,6 +48,7 @@ export async function setupDesktop(audio, notice) {
     const permissions = await native.permissions();
     for (const [id, value] of [
       ["mic-status", permissions.microphone],
+      ["screen-status", permissions.screen],
       ["accessibility-status", permissions.accessibility],
     ]) {
       const element = document.getElementById(id);
@@ -95,7 +96,7 @@ export async function setupDesktop(audio, notice) {
       permissionRequestActive = false;
     }
   }
-  for (const kind of ["microphone", "accessibility"]) {
+  for (const kind of ["microphone", "accessibility", "screen"]) {
     document.getElementById(`allow-${kind}`).onclick = async () => {
       try {
         await native.requestPermission(kind);

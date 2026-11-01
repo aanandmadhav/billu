@@ -277,3 +277,55 @@ handles pointer-capture failure without skipping recording. Regression tests
 exercise both key events with the mode button focused. Actual OS microphone
 permission and physical capture are still separate from this verified input
 routing fix.
+
+
+## P14 screenshot capability and demo validation
+
+Verified native shapes before use:
+- `/usr/sbin/screencapture -h` prints usage (and exits nonzero because `-h` is
+  not an option). The installed help documents `-x` silent, `-m` main monitor,
+  `-t` format and a destination file. The tool uses the fixed argv
+  `/usr/sbin/screencapture -x -m -t png <sandbox/captures/uuid.png>`.
+- Installed Electron 45.2.1 declarations accept `getMediaAccessStatus('screen')`.
+  The packaged application's diagnostic response was microphone `granted`,
+  screen `denied`, Accessibility `granted`.
+- Primary references: https://www.electronjs.org/docs/latest/api/system-preferences
+  and https://www.electronjs.org/docs/latest/api/desktop-capturer . Screen
+  capture requires macOS consent. `askForMediaAccess` does not accept `screen`;
+  the explicit screenshot setup action opens the Screen Recording Settings pane.
+- Apple SDK CGWindow.h also declares `bool CGPreflightScreenCaptureAccess(void)`
+  and `bool CGRequestScreenCaptureAccess(void)`. These were inspected for
+  diagnostics research; the implementation does not use them.
+
+`take_screenshot` is a registered, T1 local tool with an empty, closed schema.
+It needs an issued single-use GateToken, reserves a unique confined output path,
+checks the PNG signature/dimensions, removes incomplete files and returns no image
+bytes to the model. Previews require the same desktop token; fake mode exposes
+no real captures. Screenshots use a separate captures folder from the seeded old
+screenshots so the trash demo does not accidentally target new screen captures.
+
+Live testing found that the foreground model sometimes kept calling tools after
+a background coding job had successfully started. Successful write_code now ends
+the foreground request, while the existing background job owns progress and
+completion. Successful/failed screenshots similarly finish after their one result.
+A regression brain that repeatedly proposes write_code confirms one foreground
+execution and a successful background handoff.
+
+Validation on 2026-11-01:
+- 94 Python tests and 18 Electron tests pass; Ruff is clean.
+- All five demo beats pass three accelerated rehearsals, plus unmute and fake
+  screenshot on each run.
+- Real Sarvam/Laya/TTS rehearsal passes app start, confirmed trash, hard destructive
+  denial, pet-paid mute, unmute and screenshot routing. Eleven WAV replies were
+  produced. Desktop/code actions in this rehearsal are explicitly faked.
+- Separate real Codex build completed in 60.37s at
+  sandbox/chai-probe-0e0b08bb/index.html; generated plus/minus/reset/lower-bound
+  handlers pass a logic-only check. The checker now recognizes actual increase/
+  decrease IDs and document-level shortcut registration instead of assuming IDs.
+- Real synthesized audio -> Sarvam STT -> Sarvam chat/Laya -> fake volume 40 ->
+  real TTS passed, with a 130604-byte WAV reply.
+- The user's real microphone request was transcribed as `Screenshot`; Laya/policy
+  allowed take_screenshot, actual capture failed with a permission explanation,
+  and the task ended as screenshot_failed instead of looping. At that point the
+  packaged app reported screen permission denied. Real PNG capture awaits the
+  human enabling Catbot's screen permission and relaunching.

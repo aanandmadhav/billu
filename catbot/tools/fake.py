@@ -22,6 +22,12 @@ class FakeTools:
                 summary=f"Fake volume {self.volume}%",
                 data={"level": self.volume, "muted": self.volume == 0},
             )
+        if call.tool == "take_screenshot":
+            return ToolResult(
+                ok=True,
+                summary="Fake screenshot: no screen was accessed and no image was saved.",
+                data={"fake": True},
+            )
         if call.tool == "run_command":
             return ToolResult(
                 ok=True,

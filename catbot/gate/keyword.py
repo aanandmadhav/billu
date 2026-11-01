@@ -45,7 +45,12 @@ def command_tier(command: str):
 def keyword_tier(call: ToolCall):
     if call.tool == "run_command":
         return command_tier(str(call.args.get("command", "")))
-    return {"set_volume": "T1", "write_code": "T1", "web_search": "T0"}.get(call.tool, "T3")
+    return {
+        "set_volume": "T1",
+        "write_code": "T1",
+        "web_search": "T0",
+        "take_screenshot": "T1",
+    }.get(call.tool, "T3")
 
 
 def utterance_floor(text: str):

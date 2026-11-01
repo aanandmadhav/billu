@@ -249,6 +249,16 @@ Lines, moods, sounds and the tease script are in `docs/CHARACTER.md`. Engine rul
 - One job at a time. A second request gets "Ek app pe kaam chal raha hai, ruko."
 - If P0 shows the Codex CLI cannot run, fall back to the OpenAI API with the same tool contract: one call that returns the file contents as JSON, then write the files.
 
+### Screenshot extension (user-requested after the original phases)
+
+`take_screenshot {}` captures one main-display PNG on macOS, through the same
+Laya/policy/GateToken executor. The schema accepts no model-selected paths or
+flags. A generated capture ID maps only to sandbox/captures/<id>.png. The file
+can be viewed through the authenticated local /captures/<id>.png route. Screen
+Recording permission is required; the desktop setup offers an explicit Enable
+screenshots action. Failed captures stop the request with permission help.
+Fake mode returns an in-memory acknowledgement and never captures or writes.
+
 ## 12. Voice
 
 - **In**: the browser captures the mic (`getUserMedia` plus an `AudioWorklet`), downsamples to 16 kHz mono int16, and sends 100 ms frames (3,200 bytes) over WS `/audio` while the push-to-talk button (or Space) is held. The server streams to Sarvam STT per FINDINGS and publishes `listen` events. On release it takes the final transcript; if a confirm or tease is waiting, the transcript answers it, otherwise it starts a task. Strip a leading "Billu" or "meow" from the transcript.

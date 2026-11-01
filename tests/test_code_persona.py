@@ -89,3 +89,20 @@ def test_app_preview_isolated_from_command_api():
         assert "sandbox allow-scripts" in response.headers["Content-Security-Policy"]
         assert "connect-src 'none'" in response.headers["Content-Security-Policy"]
         assert client.get("/apps/not-a-job/index.html").status_code == 404
+
+
+async def test_successful_background_start_ends_foreground_without_model_retries():
+    from catbot.sarvam import FakeSarvam
+
+    class RepeatingCoder(FakeSarvam):
+        async def chat(self, messages):
+            return await super().chat([messages[0], {"role": "user", "content": "build an app"}])
+
+    runner = Runner(Settings(fake=True), brain=RepeatingCoder())
+    runner.code.fake_delay = 60
+    await runner.run("build an app")
+    done = next(e for e in reversed(runner.bus.history) if e.stage == "done")
+    assert done.payload["ok"] and done.payload["background"]
+    assert runner.code.busy
+    assert sum(e.stage == "execute" for e in runner.bus.history) == 1
+    await runner.close()

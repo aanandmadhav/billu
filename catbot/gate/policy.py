@@ -4,7 +4,7 @@ import re
 from catbot.contracts import PolicyVerdict, RiskDecision, ToolCall
 from catbot.gate.keyword import keyword_tier, maximum, signature
 
-TOOLS = {"run_command", "set_volume", "write_code", "web_search"}
+TOOLS = {"run_command", "set_volume", "write_code", "web_search", "take_screenshot"}
 
 
 def has_secret(value):

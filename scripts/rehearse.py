@@ -54,9 +54,12 @@ async def rehearsal(number):
     assert any(e.stage == "bubble" for e in history[executed:])
     await runner.run("volume wapas karo")
     assert not runner.persona.mime
+    await runner.run("Billu, ek screenshot lena")
+    assert runner.executor.fake.executed[-1].tool == "take_screenshot"
+    assert runner.bus.history[-1].payload["ok"]
     await runner.close()
     print(
-        f"Rehearsal {number}: 5/5 beats passed, plus unmute ({time.monotonic() - start:.2f}s accelerated fake time)."
+        f"Rehearsal {number}: 5/5 beats passed, plus unmute and screenshot ({time.monotonic() - start:.2f}s accelerated fake time)."
     )
 
 

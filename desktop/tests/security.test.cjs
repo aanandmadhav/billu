@@ -87,3 +87,36 @@ test("fake mode never invokes native permission or volume APIs", async () => {
   );
   assert.equal((await permissions.volumeStatus()).demo, true);
 });
+
+test("screenshot previews accept only fixed local capture IDs", () => {
+  const origin = "http://127.0.0.1:1234";
+  const url = `${origin}/captures/${"b".repeat(32)}.png`;
+  assert.equal(previewPrefix(url, origin), url);
+  assert.equal(previewPrefix(`${origin}/captures/../secret.png`, origin), null);
+  assert.equal(
+    previewPrefix(`https://evil.test/captures/${"b".repeat(32)}.png`, origin),
+    null,
+  );
+});
+
+test("screen permission is reported and Settings opens only on explicit request", async () => {
+  const opened = [];
+  const types = [];
+  const permissions = new Permissions({
+    platform: "darwin",
+    fake: false,
+    systemPreferences: {
+      getMediaAccessStatus: (type) => {
+        types.push(type);
+        return type === "screen" ? "denied" : "granted";
+      },
+      isTrustedAccessibilityClient: () => true,
+    },
+    shell: { openExternal: async (url) => opened.push(url) },
+  });
+  assert.equal(permissions.status().screen, "denied");
+  assert(types.includes("screen"));
+  assert.equal(opened.length, 0);
+  await permissions.request("screen");
+  assert.match(opened[0], /Privacy_ScreenCapture/);
+});

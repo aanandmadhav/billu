@@ -17,6 +17,11 @@ function allowedPermission(permission, details = {}) {
 function previewPrefix(url, origin) {
   try {
     const target = new URL(url);
+    if (
+      target.origin === origin &&
+      /^\/captures\/[a-f0-9]{32}\.png$/.test(target.pathname)
+    )
+      return `${origin}${target.pathname}`;
     return target.origin === origin &&
       /^\/apps\/[a-f0-9]{32}\//.test(target.pathname)
       ? `${origin}${target.pathname.match(/^\/apps\/[a-f0-9]{32}\//)[0]}`

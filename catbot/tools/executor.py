@@ -8,6 +8,7 @@ from catbot.gate.keyword import instruction_like
 from catbot.gate.policy import policy_gate
 from catbot.tools.fake import FakeTools
 from catbot.tools.registry import validate
+from catbot.tools.screenshot import ScreenshotTool
 from catbot.tools.shell import ShellTool, confined_path
 from catbot.tools.volume import VolumeTool
 
@@ -23,6 +24,7 @@ class Executor:
         self.fake = FakeTools()
         self.shell = ShellTool(settings)
         self.volume = VolumeTool(settings)
+        self.screenshot = ScreenshotTool(settings)
         self.code = None
         self.web = None
         self._issued = {}
@@ -76,6 +78,8 @@ class Executor:
                 result = await self.fake.run(call.model_copy(update={"args": args}))
             elif call.tool == "run_command":
                 result = await self.shell(args, cwd=cwd)
+            elif call.tool == "take_screenshot":
+                result = await self.screenshot(args)
             elif call.tool == "set_volume":
                 result = await self.volume(args)
             elif call.tool == "web_search" and self.web is not None:
