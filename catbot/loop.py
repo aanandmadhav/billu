@@ -63,10 +63,11 @@ class Runner:
         self.persona.set_mood(task_id, "dramatic", "confirmation required")
         future = asyncio.get_running_loop().create_future()
         self.pending[task_id] = future
-        self.bus.publish(task_id, "confirm", question=question, expires_in=8)
+        self.bus.publish(task_id, "confirm", question=question, expires_in=None, speaking=True)
         try:
+            await self.persona.say(task_id, question)
+            self.bus.publish(task_id, "confirm", question=question, expires_in=8, speaking=False)
             async with asyncio.timeout(8):
-                await self.persona.say(task_id, question)
                 if self.confirmer:
                     reply = await self.confirmer(task_id, question)
                 else:

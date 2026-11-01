@@ -1,0 +1,61 @@
+import { packager } from "@electron/packager";
+import { buildIcon } from "./icon.mjs";
+import { mkdir, writeFile } from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const staging = path.join(root, ".desktop-build");
+await mkdir(staging, { recursive: true });
+const projectFile = path.join(staging, "project.json");
+await writeFile(projectFile, JSON.stringify({ root }));
+const archive = path.join(staging, "electron-v45.2.1-darwin-arm64.zip");
+let archiveOptions = {};
+if (
+  process.platform === "darwin" &&
+  process.arch === "arm64" &&
+  existsSync(archive)
+) {
+  const expected = JSON.parse(
+    readFileSync(
+      path.join(root, "node_modules/electron/checksums.json"),
+      "utf8",
+    ),
+  )[path.basename(archive)];
+  if (
+    createHash("sha256").update(readFileSync(archive)).digest("hex") !==
+    expected
+  )
+    throw new Error(
+      "The local Electron download is incomplete or has an invalid checksum.",
+    );
+  archiveOptions = { electronZipDir: staging };
+}
+const icon = await buildIcon(root, staging);
+const bundles = await packager({
+  icon,
+  dir: root,
+  name: "Catbot",
+  appBundleId: "dev.hacksmith.catbot",
+  appVersion: "0.1.0",
+  out: path.join(root, "dist"),
+  overwrite: true,
+  asar: true,
+  ignore: [
+    /^\/(?:\.git|\.venv|\.env(?:\.|$)|models|assets|sandbox|catbot|tests|scripts|docs|dist|\.desktop-build)(?:\/|$)/,
+  ],
+  extraResource: [projectFile],
+  ...archiveOptions,
+  extendInfo: {
+    NSMicrophoneUsageDescription:
+      "Billu listens to your spoken commands only while you hold the talk button.",
+    NSAppleEventsUsageDescription:
+      "Billu uses approved desktop actions requested by you.",
+    NSHumanReadableCopyright: "Hacksmith · Catbot, starring Billu",
+  },
+  usageDescription: {
+    Microphone: "Billu listens while you hold the talk button.",
+  },
+});
+console.log(bundles.join("\n"));

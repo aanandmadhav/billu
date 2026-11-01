@@ -54,6 +54,7 @@ def main():
     mode.add_argument(
         "--serve", action="store_true", help="Open the local voice and decision dashboard"
     )
+    mode.add_argument("--desktop", action="store_true", help="Backend managed by the Electron app")
     parser.add_argument(
         "--fake", action="store_true", help="In-memory demo; no real services or desktop actions"
     )
@@ -67,12 +68,26 @@ def main():
     )
     args = parser.parse_args()
     settings = Settings.load(args.fake)
-    if args.serve:
+    if args.serve or args.desktop:
         import uvicorn
 
         from catbot.server import create_app
 
-        uvicorn.run(create_app(settings), host="127.0.0.1", port=settings.port)
+        if args.desktop:
+            if not settings.desktop_token:
+                parser.error("--desktop is managed by the Electron app; use npm start")
+            import json
+            import socket
+
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.bind(("127.0.0.1", 0))
+                print("CATBOT_READY " + json.dumps({"port": sock.getsockname()[1]}), flush=True)
+                config = uvicorn.Config(
+                    create_app(settings), host="127.0.0.1", log_level="warning", access_log=False
+                )
+                uvicorn.Server(config).run(sockets=[sock])
+        else:
+            uvicorn.run(create_app(settings), host="127.0.0.1", port=settings.port)
     else:
         asyncio.run(text_mode(settings, args))
 

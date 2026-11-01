@@ -46,8 +46,7 @@ fonts are local; no CDN, npm build or internet font request is needed.
 python -m catbot --serve
 ```
 
-Visit **http://127.0.0.1:8765**. The server binds to loopback only. Click **Voice on**
-for Billu's speech. Hold **Space** or the talk button to record; release to submit.
+Visit **http://127.0.0.1:8765**. The server binds to loopback only. Voice enables when you send a command, or click **Voice on** first. Hold **Space** or the talk button to record; release to submit.
 The browser asks for microphone permission. Typing always works. `Cmd/Ctrl K`
 focuses the command input. A new talk press interrupts Billu's current playback.
 
@@ -83,7 +82,7 @@ pays the demo-only chai tease in text mode. A normal text-mode tease accepts
 The real coding smoke completed in 66 seconds on this host. The fake demo runs
 faster. Coding has a 180-second process deadline and allows one job at a time.
 The main request loop allows eight steps, 60 seconds, and one confirmation.
-Confirmation expires after eight seconds; unpaid chai expires after twenty.
+Confirmation expires eight seconds after Billu finishes asking; unpaid chai expires after twenty.
 
 ## Billu's territory
 
@@ -146,3 +145,50 @@ Browser pointer/screenshot and physical microphone/loudspeaker checks could not
 be completed in this session: the browser host was unavailable and Safari native
 access was not approved. Server, WebSocket, safety, voice routing, PCM conversion,
 background concurrency and generated counter logic have executable checks.
+
+## Electron desktop app
+
+Catbot now has an Electron desktop shell. It starts its own authenticated Python
+backend on an available loopback port and stops it when the app quits. You do not
+need to run `--serve` separately.
+
+```bash
+npm install
+npm start
+# Offline demo with audible system speech:
+npm run start:fake
+# Make a local double-clickable app:
+npm run package
+```
+
+On macOS the local build appears under `dist/Catbot-darwin-arm64/Catbot.app`
+(or the host architecture equivalent). This is a local desktop build using this
+checkout's `.venv`, `.env`, assets and Laya model. Keep the checkout in place; use
+`CATBOT_PROJECT_DIR` if you move it. It is not a self-contained installer with a
+bundled Python/Torch runtime. No `.env` or model weights are copied into the app.
+
+The first live launch requests microphone permission and offers the native
+Accessibility approval flow. Click along with the OS prompts. Previously denied
+permissions open their System Settings pages; grant access there and return to
+Catbot. Microphone changes may require restarting the app. **Permissions** reopens
+the setup panel. Camera, screen recording and Full Disk Access are not requested
+because the current tools do not require them. Existing volume and sandbox file
+commands remain the supported system actions; granting Accessibility does not add
+unimplemented mouse/keyboard automation or bypass the safety gate.
+
+Voice starts enabled in Electron. **Test voice** speaks a fixed Billu line and
+reports a playback failure instead of pretending it was heard. The setup panel
+checks for muted/zero system output and offers **Restore sound**, which goes
+through the normal gated volume tool. Live replies use Sarvam's configured Hindi
+voice. Fake mode uses local system speech. If Sarvam fails, local speech is a
+visible fallback. Browser text submission now enables audio on its user gesture,
+unless you explicitly switched Voice off.
+
+Native access is isolated from the renderer: Node integration is disabled,
+context isolation and Chromium sandboxing are enabled, and permission IPC is
+restricted to the exact main page. Generated apps open in separate unprivileged
+preview windows without the native bridge or microphone access.
+
+Additional checks: `npm test` covers backend ownership/authentication/shutdown,
+native permission routing and audible-mode playback paths. `npm run smoke:electron`
+checks the installed runtime APIs and exercises its PCM and system-speech output.

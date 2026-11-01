@@ -41,8 +41,7 @@ class Persona:
             if self.audio and not self.mime and self.audio_sink:
                 try:
                     audio = await self.brain.tts(text)
-                    if audio:
-                        await self.audio_sink(task_id, audio, started=started)
+                    return await self.audio_sink(task_id, audio, started=started, text=text)
                 except Exception as exc:  # noqa: BLE001 - speech bubbles must survive TTS outages
                     self.bus.publish(
                         task_id,
@@ -50,6 +49,15 @@ class Persona:
                         message="Voice unavailable; Billu's text is shown.",
                         error=type(exc).__name__,
                     )
+                    try:
+                        return await self.audio_sink(task_id, None, started=started, text=text)
+                    except Exception as fallback_error:  # noqa: BLE001 - local speech must not stop the agent
+                        self.bus.publish(
+                            task_id,
+                            "audio_error",
+                            message="Speech playback unavailable. Check Voice and system output.",
+                            error=type(fallback_error).__name__,
+                        )
 
     async def deny(self, task_id, reason):
         self.set_mood(task_id, "offended", "safety gate denied action")

@@ -2,6 +2,7 @@ import asyncio
 import base64
 import io
 import json
+import secrets
 import time
 import wave
 from contextlib import asynccontextmanager
@@ -41,12 +42,14 @@ def same_origin(origin, host):
 
 
 class AudioHub:
-    def __init__(self):
+    def __init__(self, bus=None):
+        self.bus = bus
         self.peers = set()
         self.pending = {}
         self.interrupted_at = 0
+        self.last_audio = None
 
-    async def speak(self, task_id, audio, *, started=None):
+    async def speak(self, task_id, audio, *, started=None, text=None):
         if started is not None and started <= self.interrupted_at:
             return
         peers = tuple(self.peers)
@@ -55,23 +58,40 @@ class AudioHub:
         speech_id = uuid4().hex
         future = asyncio.get_running_loop().create_future()
         self.pending[speech_id] = (future, set(peers))
+        self.last_audio = {
+            "speech_id": speech_id,
+            "provider": "sarvam" if audio else "system",
+            "status": "sending",
+        }
         try:
             for ws in peers:
                 try:
                     await ws.send_json(
-                        {"type": "tts", "task_id": task_id, "speech_id": speech_id, "audio": audio}
+                        {
+                            "type": "tts",
+                            "task_id": task_id,
+                            "speech_id": speech_id,
+                            "audio": audio,
+                            "text": text,
+                        }
                     )
                 except (RuntimeError, WebSocketDisconnect):
                     self.peers.discard(ws)
             try:
-                with wave.open(io.BytesIO(base64.b64decode(audio)), "rb") as wav:
+                with wave.open(io.BytesIO(base64.b64decode(audio or "")), "rb") as wav:
                     duration = wav.getnframes() / wav.getframerate()
             except (ValueError, EOFError, wave.Error):
-                duration = 5
+                duration = max(3, len((text or "").split()) * 0.55)
             # Wait for the audible line to finish, so mute cannot cut off Billu's last words.
-            await asyncio.wait_for(future, timeout=min(25, duration + 2))
+            return await asyncio.wait_for(future, timeout=min(40, duration + 4))
         except TimeoutError:
-            pass
+            if self.bus:
+                self.bus.publish(
+                    task_id,
+                    "audio_error",
+                    message="Speech playback did not finish. Check your sound output.",
+                )
+            return False
         finally:
             self.pending.pop(speech_id, None)
 
@@ -81,15 +101,21 @@ class AudioHub:
             if not future.done():
                 future.set_result(False)
 
-    def acknowledge(self, ws, speech_id):
+    def acknowledge(self, ws, speech_id, status="completed", provider=None):
         pending = self.pending.get(speech_id)
         if pending and ws in pending[1] and not pending[0].done():
-            pending[0].set_result(True)
+            pending[0].set_result(status == "completed")
+            if self.last_audio and self.last_audio["speech_id"] == speech_id:
+                self.last_audio["status"] = status
+                if provider in {"sarvam", "system"}:
+                    self.last_audio["provider"] = provider
+            if self.bus:
+                self.bus.publish("audio", "audio", status=status, speech_id=speech_id)
 
 
 def create_app(settings, *, runner=None):
     runner = runner or Runner(settings, audio=True)
-    audio = AudioHub()
+    audio = AudioHub(runner.bus)
     runner.persona.audio_sink = audio.speak
     jobs = set()
     corrections = []
@@ -122,8 +148,17 @@ def create_app(settings, *, runner=None):
         TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "testserver"]
     )
 
+    def authorized(headers):
+        return not settings.desktop_token or secrets.compare_digest(
+            headers.get("authorization", ""), "Bearer " + settings.desktop_token
+        )
+
     @app.middleware("http")
     async def local_origin(request: Request, call_next):
+        if not authorized(request.headers):
+            return JSONResponse(
+                {"detail": "This backend belongs to the Catbot desktop app."}, status_code=401
+            )
         if request.method != "GET" and (
             not same_origin(request.headers.get("origin"), request.headers.get("host"))
             or request.headers.get("sec-fetch-site") == "cross-site"
@@ -138,8 +173,14 @@ def create_app(settings, *, runner=None):
     app.mount("/ui", StaticFiles(directory=UI), name="ui")
 
     @app.get("/")
-    async def index():
-        return FileResponse(UI / "index.html")
+    async def index(request: Request):
+        csp = (
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; font-src 'self'; media-src 'self' blob: data:; "
+            f"connect-src 'self' ws://{request.headers['host']}; "
+            "object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'self'"
+        )
+        return FileResponse(UI / "index.html", headers={"Content-Security-Policy": csp})
 
     @app.get("/apps/{job_id}/{relative:path}")
     async def app_asset(job_id: str, relative: str):
@@ -170,7 +211,24 @@ def create_app(settings, *, runner=None):
             "mime": runner.persona.mime,
             "corrections": len(corrections),
             "sandbox": "sandbox/",
+            "voice": {"connected": bool(audio.peers), "last": audio.last_audio},
         }
+
+    @app.post("/api/voice/test")
+    async def voice_test():
+        if runner.persona.mime:
+            raise HTTPException(409, "Billu is in mime mode. Restore volume first.")
+        if not audio.peers:
+            raise HTTPException(409, "Voice is not connected. Enable voice and try again.")
+        task_id = "voice-test-" + uuid4().hex
+        played = await runner.persona.say(
+            task_id, "Billu bol raha hoon. Awaaz aa rahi hai? Chalo, ab kaam bolo."
+        )
+        if not played:
+            raise HTTPException(
+                503, "Voice did not finish playing. Check your selected sound output and try again."
+            )
+        return {"ok": True, "task_id": task_id, "provider": "system" if settings.fake else "sarvam"}
 
     @app.post("/api/text", status_code=202)
     async def text(body: TextInput):
@@ -228,7 +286,9 @@ def create_app(settings, *, runner=None):
 
     @app.websocket("/events")
     async def events(ws: WebSocket):
-        if not same_origin(ws.headers.get("origin"), ws.headers.get("host")):
+        if not authorized(ws.headers) or not same_origin(
+            ws.headers.get("origin"), ws.headers.get("host")
+        ):
             await ws.close(code=1008)
             return
         await ws.accept()
@@ -246,7 +306,9 @@ def create_app(settings, *, runner=None):
 
     @app.websocket("/audio")
     async def audio_socket(ws: WebSocket):
-        if not same_origin(ws.headers.get("origin"), ws.headers.get("host")):
+        if not authorized(ws.headers) or not same_origin(
+            ws.headers.get("origin"), ws.headers.get("host")
+        ):
             await ws.close(code=1008)
             return
         await ws.accept()
@@ -280,7 +342,12 @@ def create_app(settings, *, runner=None):
                     continue
                 kind = message.get("type")
                 if kind == "played":
-                    audio.acknowledge(ws, message.get("speech_id"))
+                    audio.acknowledge(
+                        ws,
+                        message.get("speech_id"),
+                        message.get("status", "completed"),
+                        message.get("provider"),
+                    )
                 elif kind == "playback":
                     if message.get("enabled") is True:
                         audio.peers.add(ws)

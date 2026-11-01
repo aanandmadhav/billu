@@ -17,6 +17,7 @@ class Settings:
     model_dir: Path = ROOT / "models/laya"
     sarvam_key: str = field(default="", repr=False)
     exa_key: str = field(default="", repr=False)
+    desktop_token: str = field(default="", repr=False)
     os_name: str = platform.system().lower()
 
     @classmethod
@@ -34,6 +35,7 @@ class Settings:
             port=int(os.getenv("PORT", "8765")),
             sandbox=sandbox,
             model_dir=(ROOT / os.getenv("LAYA_MODEL_DIR", "models/laya")).resolve(),
+            desktop_token=os.getenv("CATBOT_DESKTOP_TOKEN", ""),
             sarvam_key=os.getenv("SARVAM_API_KEY", ""),
             exa_key=os.getenv("EXA_API_KEY", ""),
         )

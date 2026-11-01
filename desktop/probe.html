@@ -1,0 +1,50 @@
+<!doctype html><meta charset="utf-8" /><title>Billu voice runtime probe</title>
+<script>
+  (async () => {
+    try {
+      const context = new AudioContext();
+      await context.resume();
+      const buffer = context.createBuffer(1, 2400, 24000);
+      const values = buffer.getChannelData(0);
+      for (let i = 0; i < values.length; i++)
+        values[i] = Math.sin((i * 2 * Math.PI * 440) / 24000) * 0.025;
+      const source = context.createBufferSource();
+      source.buffer = buffer;
+      source.connect(context.destination);
+      await new Promise((resolve) => {
+        source.onended = resolve;
+        source.start();
+      });
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const voices = speechSynthesis.getVoices();
+      const speech = new SpeechSynthesisUtterance(
+        "Billu bol raha hoon. Voice is working.",
+      );
+      speech.voice =
+        voices.find(
+          (voice) => voice.localService && voice.lang.startsWith("en"),
+        ) || null;
+      speech.lang = speech.voice?.lang || "en-IN";
+      await new Promise((resolve, reject) => {
+        speech.onend = resolve;
+        speech.onerror = (event) => reject(new Error(event.error));
+        speechSynthesis.speak(speech);
+        setTimeout(() => reject(new Error("speech-timeout")), 15000);
+      });
+      console.log(
+        "CATBOT_VOICE_PROBE " +
+          JSON.stringify({
+            audioContext: context.state,
+            pcmPlayback: "completed",
+            systemSpeech: "completed",
+            localVoices: voices.filter((voice) => voice.localService).length,
+          }),
+      );
+      await context.close();
+    } catch (error) {
+      console.log(
+        "CATBOT_VOICE_PROBE " + JSON.stringify({ error: error.message }),
+      );
+    }
+  })();
+</script>

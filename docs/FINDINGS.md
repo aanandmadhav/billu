@@ -161,3 +161,54 @@ at both 44.1 kHz and 48 kHz input rates (`node scripts/check_pcm.mjs`).
 - Laya now warms one inference before setting readiness. The weights and exact
   question/state templates remain unchanged. Keyword fallback operates during warm-up.
 - Full design-law review and verification limits: `docs/UI_AUDIT.md`.
+
+## Electron desktop integration
+
+User requested Electron with native permission onboarding and audible replies.
+Official APIs reviewed before implementation:
+- https://www.electronjs.org/docs/latest/api/system-preferences :
+  `getMediaAccessStatus('microphone')`, `askForMediaAccess('microphone')` returns
+  Promise<boolean>; macOS requires NSMicrophoneUsageDescription in Info.plist.
+  Previously denied mic permission needs System Settings and app restart.
+  `isTrustedAccessibilityClient(true)` triggers the native accessibility prompt.
+- https://www.electronjs.org/docs/latest/api/session : permission check/request
+  handlers restrict media to the trusted main app and audio only.
+- https://www.electronjs.org/docs/latest/api/browser-window : sandbox/context
+  isolation/no Node in renderer; `autoplayPolicy='no-user-gesture-required'`.
+Electron and packager registry probes: electron 45.2.1, @electron/packager 20.3.0.
+The desktop app uses an owned Python backend on a kernel-assigned loopback port,
+with an ephemeral in-memory authorization token. No API key enters the renderer.
+
+Electron live probe now verified **45.2.1**. `askForMediaAccess` and session
+permission handler are functions. Read-only host status was microphone denied,
+Accessibility false; the probe did not change either permission. The packaged
+Info.plist contains the microphone purpose string.
+
+`npm run smoke:electron` completed actual Electron Web Audio PCM playback and
+SpeechSynthesis output. The full app also passed `npm run start:fake -- --smoke`:
+authenticated Python backend ready, renderer audio WebSocket connected, system
+speech receipt `status:"completed"`. This tests normal renderer startup without
+synthetic clicks or bypassing microphone permissions. The browser/native computer
+use tool still refused Electron access, so actual pointer/pixel checks remain open.
+
+The launching environment inherited ELECTRON_RUN_AS_NODE, which initially made
+Electron behave as Node. `desktop/launch.cjs` now removes it before starting the
+runtime. No global environment or existing application is modified.
+
+Full Electron **live Sarvam** playback passed as well:
+`npm start -- --smoke` -> backend true, rendererAudioConnected true,
+voice provider `sarvam`, status `completed`. The same normal startup and audio
+code is used; smoke mode only skips native permission prompts and quits after
+observing a real playback receipt. It does not fabricate audio or grant OS access.
+
+Desktop tests: **7 passed**; Python tests: **76 passed**. npm audit: **0**
+vulnerabilities after pinning patched glob/minimatch build dependencies.
+The built macOS app has bundle ID `dev.hacksmith.catbot`, a real Billu icon,
+and the microphone usage description. It is a local checkout-backed desktop app,
+not a portable Python/Torch installer. It starts/stops the sidecar automatically.
+
+The packaged `Catbot.app` also passed its own live `--smoke` run with provider
+`sarvam` and completion status. The app icon bytes match the generated Billu ICNS.
+Permission sequencing has a regression test: previously denied microphone access
+stays on that settings step; Accessibility is requested after microphone grant,
+so one settings pane cannot immediately replace the other.

@@ -113,3 +113,71 @@ def test_audio_hub_waits_for_playback_acknowledgement():
         assert not hub.pending
 
     asyncio.run(check())
+
+
+def test_electron_backend_requires_private_session_token():
+    app = create_app(Settings(fake=True, desktop_token="private-session-test"))
+    with TestClient(app) as client:
+        assert client.get("/api/stats").status_code == 401
+        assert client.post("/api/text", json={"utterance": "volume down"}).status_code == 401
+        headers = {"Authorization": "Bearer private-session-test"}
+        assert client.get("/api/stats", headers=headers).status_code == 200
+        assert client.get("/", headers=headers).status_code == 200
+        assert not app.state.runner.executor.fake.executed
+
+
+def test_voice_test_reports_disconnected_audio():
+    with TestClient(create_app(Settings(fake=True))) as client:
+        response = client.post("/api/voice/test")
+        assert response.status_code == 409
+        assert "not connected" in response.json()["detail"]
+
+
+def test_fake_mode_sends_local_speech_and_waits_for_completion():
+    app = create_app(Settings(fake=True))
+    with TestClient(app) as client, client.websocket_connect("/audio") as audio:
+        audio.send_json({"type": "playback", "enabled": True})
+        # Trigger speech on a foreground request, allowing the websocket to acknowledge it.
+        client.post("/api/text", json={"utterance": "hello Billu"})
+        message = audio.receive_json()
+        assert message["type"] == "tts"
+        assert message["audio"] is None
+        assert message["text"]
+        audio.send_json(
+            {"type": "played", "speech_id": message["speech_id"], "status": "completed"}
+        )
+        # An enabled peer is now registered and the local-speech fallback works without a service.
+        assert app.state.audio.peers
+
+
+def test_failed_playback_is_not_reported_as_completed():
+    import asyncio
+
+    from catbot.server import AudioHub
+
+    async def check():
+        hub = AudioHub()
+
+        class Peer:
+            async def send_json(self, message):
+                hub.acknowledge(self, message["speech_id"], "failed")
+
+        hub.peers.add(Peer())
+        assert await hub.speak("test", None, text="Billu") is False
+
+    asyncio.run(check())
+
+
+def test_desktop_websocket_requires_its_token():
+    import pytest
+    from starlette.websockets import WebSocketDisconnect
+
+    app = create_app(Settings(fake=True, desktop_token="test-session"))
+    with TestClient(app) as client:
+        with pytest.raises(WebSocketDisconnect), client.websocket_connect("/audio"):
+            pass
+        with client.websocket_connect(
+            "/audio", headers={"Authorization": "Bearer test-session"}
+        ) as audio:
+            audio.send_json({"type": "start"})
+            assert audio.receive_json()["type"] == "recording"

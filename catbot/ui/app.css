@@ -10,3 +10,7 @@
 .wave-ring{color:var(--stage-color)}.sticker:not(.waiting){outline-color:color-mix(in srgb,var(--c-on-accent) 35%,transparent)}
 /* Grain belongs to the substrate, keeping every word and control crisp. */
 .panel{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.025' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+.desktop-setup{grid-column:1/-1;order:-1}.desktop-setup>p{max-width:900px;color:var(--c-muted);margin-bottom:18px}.permission-rows{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:24px 0}.permission-rows>div{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}.permission-rows span{color:var(--c-saffron);font-size:14px}.permission-rows button{grid-column:1/-1;justify-self:start}.setup-note{font-size:14px}.voice-status{font-size:14px;color:var(--c-cyan);margin-top:12px}.desktop-app .topbar{flex-wrap:wrap;height:auto;min-height:78px;padding-top:12px;padding-bottom:12px}.desktop-app .topbar nav{flex-wrap:wrap}@media(max-width:767px){.permission-rows{grid-template-columns:1fr}.desktop-setup .section-head{align-items:start}.desktop-setup .section-head h2{font-size:24px}.desktop-setup .section-head button{max-width:130px}.topbar nav{flex-wrap:wrap}}
+
+.desktop-setup{max-width:1392px;width:calc(100% - 48px);margin:12px auto 16px}@media(max-width:767px){.desktop-setup{width:calc(100% - 32px)}}

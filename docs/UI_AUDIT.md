@@ -107,3 +107,34 @@ satisfy a technique checklist. The page stays a coherent local agent application
 - HTML has no duplicate IDs, missing JS control targets or external asset URLs.
 - `.env`, sandbox files and model weights remain untracked/ignored.
 - Browser/pointer/pixel and physical audio verification: **open, not claimed**.
+
+## Electron and voice follow-up
+
+The current follow-up adds a real Electron window and a functional permission
+setup section using the existing type, tokens and native HTML controls. The
+setup section sits outside the explicitly placed dashboard grid, avoiding overlap
+with Billu's stage. It uses direct permission names, visible statuses and buttons,
+44px targets, no new decorative icon tiles, no gradients, no entrance hiding and
+no added display face. The prior checklist was re-read against these additions.
+
+Voice is enabled by default in Electron. Browser submission unlocks Web Audio on
+its user gesture. Fake mode now sends actual local-speech requests. Live mode
+uses Sarvam WAV with visible system-speech fallback. Played/interrupted/failed
+receipts are distinct; voice test does not claim success after failed playback.
+Muted output gets a visible Restore sound action through the normal policy gate.
+Confirmation expiry starts after the spoken question, with buttons usable during
+speech. Native permission grants do not weaken tool policy or sandbox scope.
+
+Electron permission UI prompts are real OS prompts. Denied microphone access
+opens the exact System Settings pane; the OS may require relaunch after a change.
+No camera, screen or full-disk prompt is added. Native bridge access is limited to
+the exact main page; sandboxed previews have no bridge or media permissions. The
+main UI also sends a restrictive CSP and the private desktop backend rejects
+unauthenticated HTTP/WebSocket requests.
+
+Actual Electron 45.2.1 runtime verification now passes for Web Audio output,
+system speech, and full-app Sarvam playback, including renderer WebSocket
+connection and completion receipts. Physical listening and pointer/pixel checks
+are still not claimed: the native computer-use tool rejected Electron access.
+The application icon was rendered from the existing Billu SVG and inspected as
+an image; its silhouette, cap, glasses and headphones remain whole and centered.

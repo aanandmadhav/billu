@@ -9,3 +9,7 @@ __pycache__/
 models/laya/
 catbot/ui/fonts/
 sandbox/
+
+node_modules/
+dist/
+.desktop-build/

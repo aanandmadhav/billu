@@ -14,9 +14,20 @@
   <div class="brand"><h1>catbot<span>.</span></h1><span class="byline">with Billu</span></div>
   <div class="connection"><span class="status-light" id="connection-light"></span><span id="connection">Connecting…</span></div>
   <div class="runtime"><span id="gate-mode">keyword fallback</span><span id="platform">local desktop</span><span id="fake-mode" hidden>Fake demo</span></div>
-  <nav aria-label="Dashboard tools"><button id="focus-command" aria-label="Focus command input">⌘ K</button><button id="voice-toggle" aria-pressed="false">Voice off</button><button id="help-open" aria-label="Help and keyboard shortcuts">?</button></nav>
+  <nav aria-label="Dashboard tools"><button id="focus-command" aria-label="Focus command input">⌘ K</button><button id="permissions-open" hidden>Permissions</button><button id="test-voice">Test voice</button><button id="voice-toggle" aria-pressed="false">Voice off</button><button id="help-open" aria-label="Help and keyboard shortcuts">?</button></nav>
  </header>
+  <section id="desktop-setup" class="panel desktop-setup" aria-labelledby="setup-title" hidden>
+   <div class="section-head"><h2 id="setup-title">Billu, meet your desktop.</h2><button id="permissions-done">Continue to Billu</button></div>
+   <p>Follow the system prompts to let Billu hear you and use desktop controls. You can keep typing while permissions are pending.</p>
+   <div class="permission-rows">
+    <div><strong>Microphone</strong><span id="mic-status">Checking…</span><button id="allow-microphone">Enable microphone</button></div>
+    <div><strong>Accessibility</strong><span id="accessibility-status">Checking…</span><button id="allow-accessibility">Enable system control</button></div>
+   </div>
+   <p id="output-status" role="status"></p><button id="restore-sound" hidden>Restore sound</button><p class="setup-note">If macOS has denied a permission before, the button opens its System Settings page. Enable Catbot there, then return and check again. A microphone change may need an app restart.</p>
+   <button id="permissions-refresh">Check permissions again</button>
+  </section>
  <main class="dashboard">
+
   <section class="cat-stage panel" id="cat-stage" style="--stage-color:var(--c-faint)" aria-label="Billu">
    <div class="stage-top"><span class="nameplate">Billu</span><span id="mood-label">Gali ka don · sleepy</span></div>
    <div class="cat-scene"><div class="cat-aura" aria-hidden="true"></div><button class="cat-pet" id="pet-cat" aria-label="Pet Billu: hold Enter or the pointer for two seconds" title="Hold for 2 seconds to pet Billu"><svg id="cat" data-state="sleeping" viewBox="0 0 320 320" role="img" aria-label="Billu is sleeping" xmlns="http://www.w3.org/2000/svg">
@@ -66,7 +77,7 @@
    <form id="command-form" class="command-bar"><button type="button" id="ptt"><span data-icon="listen"></span><span id="ptt-label">Hold Space to talk</span><span class="waveform" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></button>
     <label for="utterance">Type a command</label><div class="input-row"><input id="utterance" name="utterance" placeholder="Billu, volume kam karo" autocomplete="off" required maxlength="4000"><button type="submit" aria-label="Send command"><span data-icon="send"></span></button></div>
    </form>
-   <p class="notice" id="notice" role="status"></p>
+   <p id="voice-status" class="voice-status" role="status">Connecting voice…</p><p class="notice" id="notice" role="status"></p>
   </section>
   <section class="pipeline panel" aria-labelledby="pipeline-title"><div class="section-head"><h2 id="pipeline-title"><span class="numeral">01</span>Pipeline</h2><span id="step">Waiting for you</span></div><div class="rail" id="rail" aria-label="Request stages"></div><div class="latency"><p id="pipeline-note">One request. Every action checked.</p><p><strong id="latency">0</strong><span>ms</span></p></div></section>
   <section class="decisions panel" id="decisions" tabindex="-1" aria-labelledby="decision-title"><div class="section-head"><h2 id="decision-title"><span class="numeral">02</span>Laya decides</h2><span id="decision-source">Waiting</span></div><div id="decision-rows"></div><div class="decision-foot"><span id="floor">Utterance floor: none</span><span id="risk-latency">No decision yet</span></div></section>
