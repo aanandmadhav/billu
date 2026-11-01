@@ -53,6 +53,11 @@ class Sarvam:
 class FakeSarvam:
     async def chat(self, messages):
         await asyncio.sleep(0.05)
+        if messages[-1]["role"] == "tool" and "Coding job started" in messages[-1]["content"]:
+            return {
+                "role": "assistant",
+                "content": "Kaam chal raha hai. You can give Billu another command.",
+            }
         if messages[-1]["role"] == "tool":
             return {"role": "assistant", "content": "Ho gaya. Billu ka kaam, pakka kaam."}
         text = next(m["content"] for m in reversed(messages) if m["role"] == "user").lower()

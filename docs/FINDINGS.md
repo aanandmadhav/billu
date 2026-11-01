@@ -96,3 +96,15 @@ All probes are gated before calling an integration. Network probes need network 
 - STT: installed SDK connect accepts `endpointing="manual"`, `encoding="linear16"`,
   `sample_rate="16000"`. `RealtimeAudioInput` fields: `event,audio`;
   `RealtimeEnd` fields: `event`. Live microphone round-trip is deferred to P4.
+
+## P3 real background job
+
+`scripts/smoke_code.py` ran the real gated `write_code`, using the verified CLI model
+and its existing login. It returned `job started` immediately, then completed in
+**65.96 seconds**, created `sandbox/chai-probe-10b8956c/index.html`, and ran the
+fixed `open index.html` follow-up through a fresh policy decision and GateToken.
+No volume action or speech service was invoked. `scripts/check_app.mjs` exercised
+the generated app's actual JS handlers in an isolated logic test: plus, minus,
+reset and the zero lower bound all passed. This is not a browser/pointer test.
+Browser verification remains unavailable: browser host unavailable, Safari native
+access not approved. The server, API/event flow and app CSP are covered in tests.

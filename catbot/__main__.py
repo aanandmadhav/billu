@@ -14,6 +14,15 @@ async def text_mode(settings, args):
         return await asyncio.to_thread(input, "Billu needs an answer (haan/nahi): ")
 
     runner = Runner(settings, confirmer=confirmer)
+
+    async def payment_reader():
+        if args.treat:
+            return "chai"
+        return await asyncio.to_thread(
+            input, "Billu wants chai. Type chai or press Enter to wait: "
+        )
+
+    runner.payment_reader = payment_reader
     runner.start()
     queue = runner.bus.subscribe()
 
@@ -28,6 +37,8 @@ async def text_mode(settings, args):
     printer = asyncio.create_task(display())
     try:
         await runner.run(args.text)
+        if runner.code.busy:
+            await runner.code.task
         await asyncio.sleep(0.01)
     finally:
         printer.cancel()
@@ -46,6 +57,7 @@ def main():
     parser.add_argument(
         "--fake", action="store_true", help="In-memory demo; no real services or desktop actions"
     )
+    parser.add_argument("--treat", action="store_true", help="Give Billu chai for the demo tease")
     answer = parser.add_mutually_exclusive_group()
     answer.add_argument(
         "--yes", action="store_true", help="Answer this task's single confirmation with yes"

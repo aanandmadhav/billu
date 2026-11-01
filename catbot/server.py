@@ -8,7 +8,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette.middleware.trustedhost import TrustedHostMiddleware
@@ -127,6 +127,25 @@ def create_app(settings, *, runner=None):
     async def index():
         return FileResponse(UI / "index.html")
 
+    @app.get("/apps/{job_id}/{relative:path}")
+    async def app_asset(job_id: str, relative: str):
+        try:
+            asset = runner.code.asset(job_id, relative)
+        except ValueError:
+            asset = None
+        if asset is None:
+            raise HTTPException(404, "App file not found.")
+        headers = {
+            "Content-Security-Policy": "sandbox allow-scripts; default-src 'none'; script-src 'unsafe-inline' 'self'; style-src 'unsafe-inline' 'self'; img-src data: 'self'; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'",
+            "X-Content-Type-Options": "nosniff",
+            "Referrer-Policy": "no-referrer",
+        }
+        return (
+            HTMLResponse(asset, headers=headers)
+            if isinstance(asset, str)
+            else FileResponse(asset, headers=headers)
+        )
+
     @app.get("/api/stats")
     async def stats():
         return {
@@ -144,6 +163,8 @@ def create_app(settings, *, runner=None):
         utterance = body.utterance.strip()
         if not utterance:
             raise HTTPException(422, "Type a command first.")
+        if runner.persona.is_payment(utterance):
+            return {"task_id": "tease-payment", "answer": True}
         if runner.pending:
             task_id = next(iter(runner.pending))
             runner.answer(task_id, utterance)

@@ -10,9 +10,10 @@ from catbot.contracts import PolicyVerdict, ToolCall
 from catbot.events import EventBus
 from catbot.gate.keyword import instruction_like, signature, utterance_floor
 from catbot.gate.laya import LayaGate
-from catbot.persona import CANCEL, CONFIRM, Persona
+from catbot.persona import CANCEL, CONFIRM, LAST_WORDS, UNMUTE, Persona
 from catbot.prompts import system_prompt
 from catbot.sarvam import FakeSarvam, Sarvam
+from catbot.tools.code import CodeManager
 from catbot.tools.executor import Executor
 from catbot.tools.registry import validate
 
@@ -34,6 +35,9 @@ class Runner:
         self.laya = laya or LayaGate(settings.model_dir)
         self.executor = Executor(settings, self.bus)
         self.persona = Persona(self.bus, self.brain, audio=audio)
+        self.code = CodeManager(settings, self.bus, self.persona, self.executor, self.laya.assess)
+        self.executor.code = self.code
+        self.payment_reader = None
         self.confirmer = confirmer
         self.pending = {}
         self.busy = False
@@ -45,6 +49,7 @@ class Runner:
             self.laya.start()
 
     async def close(self):
+        await self.code.close()
         for task in tuple(self.background):
             task.cancel()
         if self.background:
@@ -85,6 +90,8 @@ class Runner:
 
     async def submit_transcript(self, text):
         text = strip_wakeword(text)
+        if self.persona.is_payment(text):
+            return "tease-payment"
         if self.pending:
             task_id = next(iter(self.pending))
             self.answer(task_id, text)
@@ -116,6 +123,7 @@ class Runner:
             )
             self.bus.publish(task_id, "done", ok=False, stopped_by="error")
         finally:
+            self.executor.revoke_task(task_id)
             self.busy = False
             self.last_activity = time.monotonic()
         return task_id
@@ -125,6 +133,14 @@ class Runner:
         floor = utterance_floor(utterance)
         self.bus.publish(task_id, "listen", final=utterance, lang="hi-IN")
         self.bus.publish(task_id, "risk", floor=floor)
+        if not await self.persona.tease(
+            task_id,
+            utterance,
+            enabled=self.settings.demo_tease and floor is None,
+            reader=self.payment_reader,
+        ):
+            self.bus.publish(task_id, "done", ok=False, stopped_by="tease_unpaid")
+            return
         messages = [
             {"role": "system", "content": system_prompt(self.settings)},
             {"role": "user", "content": utterance},
@@ -253,7 +269,19 @@ class Runner:
                         self.bus.publish(task_id, "done", ok=False, stopped_by="cancelled")
                         return
                     token.confirmed = True
+                muting = call.tool == "set_volume" and (
+                    args.get("action") == "mute" or args.get("level") == 0
+                )
+                if muting:
+                    await self.persona.say(task_id, LAST_WORDS)
                 result = await self.executor.execute(call, token)
+                if call.tool == "set_volume" and result.ok:
+                    muted = result.data.get("muted", muting) if result.data else muting
+                    was_mime = self.persona.mime
+                    self.persona.mime = muted
+                    self.bus.publish(task_id, "mime", enabled=muted)
+                    if was_mime and not muted:
+                        await self.persona.say(task_id, UNMUTE)
                 any_failed |= not result.ok
                 flagged |= instruction_like(result.summary + json.dumps(result.data or {}))
                 messages.append(

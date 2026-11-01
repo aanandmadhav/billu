@@ -1,4 +1,5 @@
 import asyncio
+import re
 
 CONFIRM = "Pakka? Baad me rona mat. {action}? Haan ya nahi?"
 DENY = "Arre pagal hai kya? Mummy ko bataun?"
@@ -23,6 +24,8 @@ class Persona:
         self.audio = audio
         self.audio_sink = None
         self.mime = False
+        self.teased = False
+        self.payment = None
         self.mood = "sleepy"
         self.speech_lock = asyncio.Lock()
 
@@ -49,3 +52,54 @@ class Persona:
     async def deny(self, task_id, reason):
         self.set_mood(task_id, "offended", "safety gate denied action")
         await self.say(task_id, f"{DENY} {reason}")
+
+    def pay(self, kind="treat"):
+        if self.payment is not None and not self.payment.done():
+            self.payment.set_result(kind)
+            return True
+        return False
+
+    def is_payment(self, text):
+        if re.search(r"chai|parle|biscuit|चाय|बिस्कुट", text, re.IGNORECASE):
+            return self.pay("treat")
+        return False
+
+    async def tease(self, task_id, utterance, *, enabled=True, reader=None, timeout=20):
+        if (
+            not enabled
+            or self.teased
+            or not re.search(
+                r"\bvolume\s*(?:0|zero|shunya|band)\b|\bmute\b|\bawaaz band\b|आवाज़ बंद",
+                utterance,
+                re.IGNORECASE,
+            )
+        ):
+            return True
+        self.teased = True
+        self.payment = asyncio.get_running_loop().create_future()
+        self.set_mood(task_id, "chai_craving", "Billu wants chai before going quiet")
+        try:
+            await self.say(
+                task_id,
+                "Volume zero? Matlab ab sirf tum bologe, aur main chup-chaap sunta rahunga? Ek-tarfa pyaar nahi chalega, bhai. Pehle ek cutting chai pilao.",
+            )
+            self.bus.publish(task_id, "tease", waiting=True, expires_in=timeout)
+            async with asyncio.timeout(timeout):
+                if reader:
+                    reply = await reader()
+                    self.is_payment(reply)
+                kind = await self.payment
+            self.bus.publish(
+                task_id,
+                "pet" if kind == "pet" else "treat",
+                sound="purr" if kind == "pet" else "slurp",
+                paid=True,
+            )
+            await self.say(task_id, "Haan theek hai.")
+            return True
+        except TimeoutError:
+            await self.say(task_id, "Theek hai, mat pilao. Volume wahi rahega.")
+            return False
+        finally:
+            self.payment = None
+            self.bus.publish(task_id, "tease", waiting=False)

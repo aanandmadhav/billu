@@ -27,11 +27,21 @@ class Executor:
 
     def authorize(self, call, risk, **context):
         token = GateToken(call_id=call.call_id, verdict=policy_gate(call, risk, **context))
-        self._issued[id(token)] = (token, fingerprint(call), token.verdict.model_dump_json())
+        self._issued[id(token)] = (
+            token,
+            fingerprint(call),
+            token.verdict.model_dump_json(),
+            call.task_id,
+        )
         return token
 
     def discard(self, token):
         self._issued.pop(id(token), None)
+
+    def revoke_task(self, task_id):
+        for identity, entry in tuple(self._issued.items()):
+            if entry[3] == task_id:
+                self._issued.pop(identity, None)
 
     async def execute(self, call, token, *, cwd=None):
         issued = self._issued.get(id(token))

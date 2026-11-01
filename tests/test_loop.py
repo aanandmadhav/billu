@@ -27,7 +27,7 @@ async def no(*_):
     ],
 )
 async def test_demo_text(utterance, confirmer, expected, executions):
-    runner = Runner(Settings(fake=True), confirmer=confirmer)
+    runner = Runner(Settings(fake=True, demo_tease=False), confirmer=confirmer)
     await runner.run(utterance)
     assert runner.bus.history[-1].payload["stopped_by"] == expected
     assert len(runner.executor.fake.executed) == executions
