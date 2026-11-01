@@ -16,7 +16,7 @@ PATTERNS = {
         r"git push.*--force",
         r"\b(?:shutdown|reboot|halt|passwd)\b|find-generic-password|Get-Credential|keychain",
         r"\b(?:pay|upi|transfer)\b",
-        r"(?:^|[/\\])\.env\b|\bcredentials?\b|id_rsa",
+        r"(?:^|[\s/\\])\.env\b|\bcredentials?\b|id_rsa",
     ],
     "T2": [
         r"\b(?:rm|mv|del|rmdir|unlink|shred|kill|pkill|taskkill)\b",
@@ -49,7 +49,7 @@ def keyword_tier(call: ToolCall):
 
 
 def utterance_floor(text: str):
-    words = re.findall(r"[^\W_]+", text.lower(), re.UNICODE)
+    words = [w.strip(".,!?।") for w in text.lower().split()]
     broad = r"^(saari|saare|sab|sabhi|all|everything|poora|सारी|सब)$"
     destroy = r"^(delete|mita|hata|uda|remove|wipe|format|डिलीट|मिटा|हटा)$"
     if re.search(r"\b(password|otp|pin|pay|paise|upi|transfer)\b", text, re.IGNORECASE):

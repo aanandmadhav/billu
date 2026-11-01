@@ -1,37 +1,68 @@
-"""P0 bootstrap; the full conversation loop is added in P1."""
-
 import argparse
+import asyncio
 
 from catbot.config import Settings
-from catbot.contracts import GateToken, ToolCall
-from catbot.gate.keyword import decision, utterance_floor
-from catbot.gate.policy import policy_gate
+from catbot.loop import Runner
+
+
+async def text_mode(settings, args):
+    async def confirmer(task_id, question):
+        if args.yes:
+            return "haan"
+        if args.no:
+            return "nahi"
+        return await asyncio.to_thread(input, "Billu needs an answer (haan/nahi): ")
+
+    runner = Runner(settings, confirmer=confirmer)
+    runner.start()
+    queue = runner.bus.subscribe()
+
+    async def display():
+        while True:
+            event = await queue.get()
+            if event.stage in {"speak", "bubble"}:
+                print("Billu:", event.payload["text"], flush=True)
+            elif event.stage in {"gate", "code"}:
+                print(event.stage + ":", event.payload, flush=True)
+
+    printer = asyncio.create_task(display())
+    try:
+        await runner.run(args.text)
+        await asyncio.sleep(0.01)
+    finally:
+        printer.cancel()
+        await asyncio.gather(printer, return_exceptions=True)
+        runner.bus.unsubscribe(queue)
+        await runner.close()
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Catbot, starring Billu")
-    parser.add_argument("--text")
-    parser.add_argument("--fake", action="store_true")
+    parser = argparse.ArgumentParser(description="Catbot, starring Billu the Delhi street cat")
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--text", help="Give Billu a text command")
+    mode.add_argument(
+        "--serve", action="store_true", help="Open the local voice and decision dashboard"
+    )
+    parser.add_argument(
+        "--fake", action="store_true", help="In-memory demo; no real services or desktop actions"
+    )
+    answer = parser.add_mutually_exclusive_group()
+    answer.add_argument(
+        "--yes", action="store_true", help="Answer this task's single confirmation with yes"
+    )
+    answer.add_argument(
+        "--no", action="store_true", help="Answer this task's single confirmation with no"
+    )
     args = parser.parse_args()
-    Settings.load(args.fake)
-    call = ToolCall(
-        task_id="bootstrap",
-        step=1,
-        call_id="volume",
-        tool="set_volume",
-        args={"action": "down"},
-        request_en=args.text or "volume kam karo",
-    )
-    token = GateToken(
-        call_id=call.call_id,
-        verdict=policy_gate(call, decision(call), floor=utterance_floor(call.request_en)),
-    )
-    if not args.fake:
-        parser.error("P0 bootstrap supports --fake only")
-    if token.verdict.verdict == "allow":
-        print("Billu: Ho gaya. Fake volume is now 40.")
+    settings = Settings.load(args.fake)
+    if args.serve:
+        import uvicorn
+
+        from catbot.server import create_app
+
+        uvicorn.run(create_app(settings), host="127.0.0.1", port=settings.port)
     else:
-        print("Billu:", token.verdict.reason)
+        asyncio.run(text_mode(settings, args))
 
 
 if __name__ == "__main__":
