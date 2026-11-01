@@ -396,3 +396,39 @@ The next diagnostic input needed is a human screenshot of Catbot's row in Screen
 & System Audio Recording. The final build is frozen so further code signing does
 not invalidate the permission while that state is checked. Real capture is still
 unverified and is not reported as working.
+
+
+## P16 real capture verified after targeted TCC repair
+
+Computer Use became available after the human enabled it. Direct System Settings
+inspection showed Catbot enabled for Screen & System Audio Recording. Its Show
+in Finder action resolved to this repository's dist/Catbot-darwin-arm64 folder,
+ruling out a grant to a different installed copy.
+
+The macOS privacy logs exposed the exact mismatch: TCC checked
+`dev.hacksmith.catbot` against the old Electron cdhash
+`2cc11dd82a0b0b85d58d5eddadadd3690850195a` and returned `-67050`.
+The unchanged final native bundle's designated requirement was instead
+`a2e80821de38d407abeea9d0b12bbc9da6e6549e`.
+The enabled toggle alone therefore did not represent a valid grant for that code.
+
+With explicit human approval, ran only
+`tccutil reset ScreenCapture dev.hacksmith.catbot` (confirmed successful), then
+used System Settings' Add picker to select the unchanged final bundle. The human
+completed the required Touch ID authentication. Accepted Quit & Reopen. No other
+app's grant was changed, and no binary was rebuilt or re-signed during this repair.
+Catbot's own UI then reported Screen capture: Ready.
+
+Submitted `Billu, take a screenshot of the main screen` using the real Catbot
+input through native UI. The normal Sarvam/Laya/policy path allowed the call,
+then the tool saved sandbox/captures/535ec34fe7d349a1bf7f85c8ef655bdd.png.
+The authenticated View screenshot link opened a real 3024x1964 PNG preview.
+Visual inspection confirmed actual desktop windows, including Catbot, rather
+than wallpaper-only or a synthetic image. This completes the previously blocked
+real-capture verification. The private screenshot remains ignored by git.
+
+The current newly signed app's UI still reports microphone and Accessibility as
+needing permission; only its screen grant was repaired in this operation. The
+human can restore those grants through the existing setup controls. Earlier live
+microphone evidence predates the signing identity repair. No new physical mic
+success is claimed for this identity.

@@ -227,3 +227,18 @@ uses an isolated native window with no preload or media privileges. Permission
 failures remain visible and do not claim capture success. Pointer/pixel checks
 remain unverified; actual voice input and permission-failure handling have live
 application evidence.
+
+
+## Native visual verification now available
+
+Inspected the real app using Computer Use after access was enabled. Simple mode
+shows Billu and the composer with no clipped input; the mode button restores the
+full dashboard. The full layout keeps the Billu pane in place while the activity
+pane scrolls. The microphone control aligns beside the input with visible focus
+and adequate edge clearance. Actual text submission, full/simple toggle, opening
+the permission panel and View screenshot were exercised. The captured PNG preview
+contains real desktop windows and renders at 3024x1964. No binary rebuild was
+needed after the final permission repair. Earlier unverified notes above describe
+the limitations at those earlier checkpoints; these observed controls and the
+real screenshot path are now verified. Physical mic capture for the newly signed
+identity still needs a fresh OS microphone grant.
