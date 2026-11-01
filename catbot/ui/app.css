@@ -228,3 +228,37 @@
     scroll-behavior: auto;
   }
 }
+
+/* Keep voice capture beside the text composer with a matching touch target. */
+.command-entry {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+}
+.command-entry .input-row {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.command-entry #ptt {
+  flex: 0 0 48px;
+  width: 48px;
+  height: auto;
+  min-height: 48px;
+  padding: 12px;
+  border-radius: var(--r-sm);
+}
+.command-entry #ptt.recording > [data-icon] {
+  display: none;
+}
+.control-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

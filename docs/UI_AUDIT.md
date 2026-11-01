@@ -157,3 +157,17 @@ All control IDs and handlers are preserved. Source structure and existing
 Python/Electron checks pass. Pixel alignment, clipping at zoom and actual
 pointer scrolling still require visual verification; native computer access
 was previously rejected, so these checks are not claimed.
+
+
+## Voice button beside the composer
+
+Rechecked the design-law points against the composer change: the existing
+microphone mark now sits bare in a functional 48px button to the right of the
+input. Its height stretches to match the input row, with an 8px gap and no hover
+movement, glow or new palette/font. The input can shrink without forcing page
+overflow; the voice target retains its size. The recording waveform replaces
+the icon in the same space. The full label stays available to assistive technology
+and the tooltip explains holding/releasing. No behavior or control IDs changed.
+No live text is clipped; the only clipped label is deliberately screen-reader
+text. Source review and existing checks pass; actual pixel/pointer verification
+remains open because native computer access was previously rejected.

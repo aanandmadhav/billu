@@ -64,8 +64,12 @@
    <div class="cat-copy"><p id="state-headline" class="state-headline">Kya hai?</p><p class="speech" id="speech" aria-live="polite">Bolo jaldi. Chai thandi ho rahi hai.</p></div>
    <div class="companion-actions"><span id="pet-hint">Hold Billu for 2 seconds to pet</span><button id="treat"><span data-icon="chai"></span>Give chai</button></div>
    <p class="transcript" id="transcript" aria-live="polite">Your next command goes here.</p>
-   <form id="command-form" class="command-bar"><button type="button" id="ptt"><span data-icon="listen"></span><span id="ptt-label">Hold Space to talk</span><span class="waveform" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></button>
-    <label for="utterance">Type a command</label><div class="input-row"><input id="utterance" name="utterance" placeholder="Billu, volume kam karo" autocomplete="off" required maxlength="4000"><button type="submit" aria-label="Send command"><span data-icon="send"></span></button></div>
+   <form id="command-form" class="command-bar">
+    <label for="utterance">Type a command</label>
+    <div class="command-entry">
+     <div class="input-row"><input id="utterance" name="utterance" placeholder="Billu, volume kam karo" autocomplete="off" required maxlength="4000"><button type="submit" aria-label="Send command"><span data-icon="send"></span></button></div>
+     <button type="button" id="ptt" title="Hold to talk, release to send. You can also hold Space outside the text input."><span data-icon="listen" aria-hidden="true"></span><span id="ptt-label" class="control-label">Hold Space to talk</span><span class="waveform" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></button>
+    </div>
    </form>
    <p id="voice-status" class="voice-status" role="status">Connecting voice…</p><p class="notice" id="notice" role="status"></p>
   </section>

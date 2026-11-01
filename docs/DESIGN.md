@@ -254,8 +254,8 @@ Single column in priority order: Cat Stage (240px) → Command bar (sticky botto
 
   (Hindi copy avoids gendered verb endings for the cat on purpose.)
 - **Transcript ticker:** partial text in `--c-magenta` Urbanist 600 22px, final text in `--c-paper`. If longer than the box, it scrolls as a marquee (pauses on hover/focus, static under reduced motion). `aria-live="polite"` on final text only.
-- **Push-to-talk button:** pill, 56px tall, full width of the stage, `--c-surface-2`, label "Hold Space to talk" + mic icon. While held: fill `--c-magenta`, text `--c-on-accent`, waveform bars animate from mic RMS level sent in `listen` events (`payload.level`, 0–1). Keyboard: Space held when focus is not in a text field. Mouse/touch: pointerdown/pointerup.
-- **Text input** under it: "or type… volume kam karo" placeholder plus a visible label "Type a command" (visually small, not placeholder-only). Enter submits to `POST /api/text`.
+- **Push-to-talk button (user layout override):** a compact 48px microphone button to the right of the chat input and send action, with the full hold/release instructions in its accessible label and tooltip. It matches the input radius and stays on the same row on small screens. Former full-width placement is superseded. Uses `--c-surface-2`, label "Hold Space to talk" + mic icon. While held: fill `--c-magenta`, text `--c-on-accent`, waveform bars animate from mic RMS level sent in `listen` events (`payload.level`, 0–1). Keyboard: Space held when focus is not in a text field. Mouse/touch: pointerdown/pointerup.
+- **Text input** alongside it: "or type… volume kam karo" placeholder plus a visible label "Type a command" (visually small, not placeholder-only). Enter submits to `POST /api/text`.
 
 ### 7.3 Pipeline Rail (01)
 
