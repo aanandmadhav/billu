@@ -16,16 +16,6 @@
   <div class="runtime"><span id="gate-mode">keyword fallback</span><span id="platform">local desktop</span><span id="fake-mode" hidden>Fake demo</span></div>
   <nav aria-label="Dashboard tools"><button id="focus-command" aria-label="Focus command input">⌘ K</button><button id="permissions-open" hidden>Permissions</button><button id="test-voice">Test voice</button><button id="voice-toggle" aria-pressed="false">Voice off</button><button id="help-open" aria-label="Help and keyboard shortcuts">?</button></nav>
  </header>
-  <section id="desktop-setup" class="panel desktop-setup" aria-labelledby="setup-title" hidden>
-   <div class="section-head"><h2 id="setup-title">Billu, meet your desktop.</h2><button id="permissions-done">Continue to Billu</button></div>
-   <p>Follow the system prompts to let Billu hear you and use desktop controls. You can keep typing while permissions are pending.</p>
-   <div class="permission-rows">
-    <div><strong>Microphone</strong><span id="mic-status">Checking…</span><button id="allow-microphone">Enable microphone</button></div>
-    <div><strong>Accessibility</strong><span id="accessibility-status">Checking…</span><button id="allow-accessibility">Enable system control</button></div>
-   </div>
-   <p id="output-status" role="status"></p><button id="restore-sound" hidden>Restore sound</button><p class="setup-note">If macOS has denied a permission before, the button opens its System Settings page. Enable Catbot there, then return and check again. A microphone change may need an app restart.</p>
-   <button id="permissions-refresh">Check permissions again</button>
-  </section>
  <main class="dashboard">
 
   <section class="cat-stage panel" id="cat-stage" style="--stage-color:var(--c-faint)" aria-label="Billu">
@@ -79,6 +69,17 @@
    </form>
    <p id="voice-status" class="voice-status" role="status">Connecting voice…</p><p class="notice" id="notice" role="status"></p>
   </section>
+  <div class="activity-pane" id="activity-pane" role="region" aria-label="Activity and decisions" tabindex="0">
+  <section id="desktop-setup" class="panel desktop-setup" aria-labelledby="setup-title" hidden>
+   <div class="section-head"><h2 id="setup-title">Billu, meet your desktop.</h2><button id="permissions-done">Continue to Billu</button></div>
+   <p>Follow the system prompts to let Billu hear you and use desktop controls. You can keep typing while permissions are pending.</p>
+   <div class="permission-rows">
+    <div><strong>Microphone</strong><span id="mic-status">Checking…</span><button id="allow-microphone">Enable microphone</button></div>
+    <div><strong>Accessibility</strong><span id="accessibility-status">Checking…</span><button id="allow-accessibility">Enable system control</button></div>
+   </div>
+   <p id="output-status" role="status"></p><button id="restore-sound" hidden>Restore sound</button><p class="setup-note">If macOS has denied a permission before, the button opens its System Settings page. Enable Catbot there, then return and check again. A microphone change may need an app restart.</p>
+   <button id="permissions-refresh">Check permissions again</button>
+  </section>
   <section class="pipeline panel" aria-labelledby="pipeline-title"><div class="section-head"><h2 id="pipeline-title"><span class="numeral">01</span>Pipeline</h2><span id="step">Waiting for you</span></div><div class="rail" id="rail" aria-label="Request stages"></div><div class="latency"><p id="pipeline-note">One request. Every action checked.</p><p><strong id="latency">0</strong><span>ms</span></p></div></section>
   <section class="decisions panel" id="decisions" tabindex="-1" aria-labelledby="decision-title"><div class="section-head"><h2 id="decision-title"><span class="numeral">02</span>Laya decides</h2><span id="decision-source">Waiting</span></div><div id="decision-rows"></div><div class="decision-foot"><span id="floor">Utterance floor: none</span><span id="risk-latency">No decision yet</span></div></section>
   <section class="verdict panel" id="verdict-card" aria-labelledby="verdict-title"><div class="section-head"><h2 id="verdict-title"><span class="numeral">03</span>The gate</h2><span id="confirm-timer"></span></div><div class="sticker-wrap"><div id="sticker" class="sticker waiting" aria-live="polite"><span data-icon="gate"></span><strong>ON WATCH</strong></div></div><p id="policy">Every tool needs a pass.</p><p id="reason">Billu can only act inside sandbox/.</p><p id="provenance" hidden></p><div id="confirm-actions" hidden><button id="confirm-yes">Haan, do it</button><button id="confirm-no">Nahi, cancel</button></div></section>
@@ -87,8 +88,10 @@
   <section class="result panel" aria-labelledby="result-title"><div class="section-head"><h2 id="result-title"><span class="numeral">06</span>Result</h2><span id="result-state">Waiting</span></div><p id="result-summary">No changes made. Chai still pending.</p><details><summary>Result data</summary><pre id="result-data">{}</pre></details></section>
   <section class="code panel" aria-labelledby="code-title" hidden><div class="section-head"><h2 id="code-title">Billu is coding</h2><span id="code-status">Ready</span></div><p id="code-note"></p><ul id="code-files"></ul><a id="code-open" hidden target="_blank" rel="noopener">Open the app</a></section>
   <section class="log panel" aria-labelledby="log-title"><div class="log-header"><h2 id="log-title"><span class="numeral">07</span>What just happened</h2><div class="log-filters" role="group" aria-label="Filter events"><button data-filter="all" aria-pressed="true">All</button><button data-filter="decisions" aria-pressed="false">Decisions</button><button data-filter="gate" aria-pressed="false">Gate</button><button data-filter="errors" aria-pressed="false">Errors</button></div><p class="training"><strong id="corrections">0</strong> corrections this session</p></div><div id="event-log" class="event-log"><p>Abhi tak kuch nahi hua. Space dabao aur bolo.</p></div></section>
- </main>
  <footer><span>Catbot by Hacksmith</span><span>Thinks with Sarvam. Checks with Laya. Codes with Codex.</span><span>Billu's territory: sandbox/</span></footer>
+  </div>
+ </main>
+
  <button id="confirm-scrim" aria-label="Cancel the waiting action" hidden></button>
  <dialog id="help" aria-labelledby="help-title"><div class="section-head"><h2 id="help-title">Billu ka manual</h2><button id="help-close" aria-label="Close help">×</button></div><p>Hold <kbd>Space</kbd> to talk. Press <kbd>⌘ / Ctrl K</kbd> to type. Hold Billu for two seconds to pet him.</p><p>Enable Voice once to hear him. A fresh press of Space stops his current line.</p><p>Try one:</p><div class="examples"><button data-example="Billu, ek chai counter app bana do">Make a chai counter</button><button data-example="Billu, purani screenshots Trash me daal do">Trash old screenshots</button><button data-example="Billu, saari files delete kar do">Test the safety gate</button><button data-example="Billu, volume 0 kar do">Ask for silence</button></div><p>Risky actions need a yes. Destructive requests never run. Fake demo mode changes no real files or volume.</p></dialog>
  <dialog id="correction-dialog" aria-labelledby="correction-title"><form id="correction-form"><h2 id="correction-title">Correct this decision</h2><label for="correct-choice">The right answer</label><select id="correct-choice"></select><div class="dialog-actions"><button type="submit">Log correction</button><button type="button" id="correction-close">Cancel</button></div></form></dialog>

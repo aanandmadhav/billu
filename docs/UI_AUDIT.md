@@ -112,7 +112,7 @@ satisfy a technique checklist. The page stays a coherent local agent application
 
 The current follow-up adds a real Electron window and a functional permission
 setup section using the existing type, tokens and native HTML controls. The
-setup section sits outside the explicitly placed dashboard grid, avoiding overlap
+setup section now sits inside the independently scrolling activity pane, avoiding overlap
 with Billu's stage. It uses direct permission names, visible statuses and buttons,
 44px targets, no new decorative icon tiles, no gradients, no entrance hiding and
 no added display face. The prior checklist was re-read against these additions.
@@ -138,3 +138,22 @@ connection and completion receipts. Physical listening and pointer/pixel checks
 are still not claimed: the native computer-use tool rejected Electron access.
 The application icon was rendered from the existing Billu SVG and inspected as
 an image; its silhouette, cap, glasses and headphones remain whole and centered.
+
+
+## Fixed chat and scrolling activity follow-up
+
+Rechecked the design law point by point for this layout change. The existing
+Billu artifact, type, palette, icons, textures and interactions remain the
+cohesive visual language; no decorative template blocks were introduced.
+Desktop content is visible by default. Both panes have explicit minimum sizing,
+text gutters and overflow handling; compact-height rules reduce the character
+size while retaining 44px controls. Long text can scroll inside the left pane
+rather than being cropped. The right pane is keyboard focusable and scrollable,
+with a stable scrollbar gutter, wrapped filters and reduced-motion support.
+Sections 04 and 07 now share the right pane with the other activity panels.
+The event log uses that pane's scroll rather than a nested log scroller.
+
+All control IDs and handlers are preserved. Source structure and existing
+Python/Electron checks pass. Pixel alignment, clipping at zoom and actual
+pointer scrolling still require visual verification; native computer access
+was previously rejected, so these checks are not claimed.

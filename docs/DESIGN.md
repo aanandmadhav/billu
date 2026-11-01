@@ -188,6 +188,8 @@ Rules:
 
 ## 6. Layout
 
+**Current desktop layout (user direction):** At 850px and wider, keep Billu's chat and command area in a stationary left pane. The right activity pane contains the permission setup and all decision panels, including 04 (Billu's plan) and 07 (What just happened), and scrolls independently. The footer belongs to that right pane. On short windows or enlarged text, the left pane may scroll internally so controls remain reachable. Smaller screens retain the flowing responsive layout. This supersedes the desktop grid placement below.
+
 Single page, `min-height: 100dvh`, max content width 1440px, side gutter `--s-5` (16px under 640px).
 
 ### Desktop ≥ 1200px (12-column bento, gap `--s-4`)

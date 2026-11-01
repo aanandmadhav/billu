@@ -14,3 +14,217 @@
 .desktop-setup{grid-column:1/-1;order:-1}.desktop-setup>p{max-width:900px;color:var(--c-muted);margin-bottom:18px}.permission-rows{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:24px 0}.permission-rows>div{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}.permission-rows span{color:var(--c-saffron);font-size:14px}.permission-rows button{grid-column:1/-1;justify-self:start}.setup-note{font-size:14px}.voice-status{font-size:14px;color:var(--c-cyan);margin-top:12px}.desktop-app .topbar{flex-wrap:wrap;height:auto;min-height:78px;padding-top:12px;padding-bottom:12px}.desktop-app .topbar nav{flex-wrap:wrap}@media(max-width:767px){.permission-rows{grid-template-columns:1fr}.desktop-setup .section-head{align-items:start}.desktop-setup .section-head h2{font-size:24px}.desktop-setup .section-head button{max-width:130px}.topbar nav{flex-wrap:wrap}}
 
 .desktop-setup{max-width:1392px;width:calc(100% - 48px);margin:12px auto 16px}@media(max-width:767px){.desktop-setup{width:calc(100% - 32px)}}
+
+/* Independent desktop panes: Billu stays in place while activity scrolls. */
+.activity-pane {
+  display: contents;
+}
+.activity-pane > .desktop-setup {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+.activity-pane > footer {
+  grid-column: 1/-1;
+}
+@media (min-width: 850px) {
+  body {
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .topbar {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+  .dashboard {
+    width: 100%;
+    flex: 1 1 0;
+    min-height: 0;
+    grid-template-columns: minmax(320px, 5fr) minmax(0, 7fr);
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+  }
+  .cat-stage {
+    grid-column: 1;
+    grid-row: 1;
+    position: relative;
+    top: auto;
+    align-self: stretch;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 20px 24px;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+  .cat-stage > * {
+    flex-shrink: 0;
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .cat-stage .cat-scene {
+    flex: 1 1 auto;
+    min-height: 100px;
+    max-height: 320px;
+    padding-top: 0;
+  }
+  .cat-stage .cat-pet {
+    width: min(100%, clamp(100px, calc(100dvh - 660px), 300px));
+  }
+  .cat-stage .state-headline {
+    font-size: clamp(36px, 3.6vw, 52px);
+    line-height: 1.15;
+    margin: 0 0 8px;
+  }
+  .cat-stage .speech {
+    min-height: 44px;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+  .cat-stage .companion-actions {
+    margin: 8px 0 4px;
+  }
+  .cat-stage .transcript {
+    min-height: 24px;
+    margin: 0 0 10px;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+  .cat-stage .command-bar {
+    padding-top: 0;
+  }
+  .cat-stage .voice-status {
+    margin-top: 10px;
+  }
+  .cat-stage .notice:empty {
+    display: none;
+  }
+  .activity-pane {
+    grid-column: 2;
+    grid-row: 1;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    align-content: start;
+    gap: 16px;
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-gutter: stable;
+    padding: 0 8px 8px 4px;
+    scroll-behavior: smooth;
+  }
+  .activity-pane > .pipeline,
+  .activity-pane > .plan,
+  .activity-pane > .log,
+  .activity-pane > .code,
+  .activity-pane > .desktop-setup,
+  .activity-pane > footer {
+    grid-column: 1/-1;
+    grid-row: auto;
+  }
+  .activity-pane > .decisions,
+  .activity-pane > .tool {
+    grid-column: 1/5;
+    grid-row: auto;
+  }
+  .activity-pane > .verdict,
+  .activity-pane > .result {
+    grid-column: 5/-1;
+    grid-row: auto;
+  }
+  .activity-pane > .desktop-setup {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    order: 0;
+  }
+  .activity-pane .permission-rows {
+    grid-template-columns: 1fr;
+  }
+  .activity-pane .event-log {
+    max-height: none;
+    overflow: visible;
+  }
+  .activity-pane > footer {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    padding: 8px 4px 20px;
+  }
+  .activity-pane > footer span {
+    text-align: left;
+  }
+}
+@media (min-width: 850px) and (max-width: 1179px) {
+  .activity-pane {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .activity-pane > .panel {
+    grid-column: 1/-1;
+  }
+  .activity-pane .log-header {
+    gap: 12px;
+  }
+  .activity-pane .log-filters {
+    flex-wrap: wrap;
+  }
+}
+@media (min-width: 850px) and (max-height: 800px) {
+  .cat-stage {
+    padding: 16px 20px;
+  }
+  .cat-stage .cat-scene {
+    min-height: 72px;
+    max-height: 190px;
+  }
+  .cat-stage .cat-pet {
+    width: min(100%, clamp(72px, calc(100dvh - 570px), 160px));
+  }
+  .cat-stage .state-headline {
+    font-size: 32px;
+    margin-bottom: 6px;
+  }
+  .cat-stage .speech {
+    min-height: 0;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+  .cat-stage .companion-actions {
+    margin: 4px 0;
+  }
+  .cat-stage .transcript {
+    font-size: 15px;
+    min-height: 20px;
+    margin-bottom: 6px;
+  }
+  .cat-stage .command-bar {
+    gap: 4px;
+  }
+  .cat-stage .command-bar label {
+    margin-top: 4px;
+  }
+  .cat-stage #ptt {
+    height: 44px;
+  }
+  .cat-stage .voice-status {
+    margin-top: 4px;
+  }
+}
+@media (max-width: 849px) {
+  .activity-pane > footer {
+    order: 10;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .activity-pane {
+    scroll-behavior: auto;
+  }
+}
