@@ -1,5 +1,6 @@
 import asyncio
 import re
+import time
 
 CONFIRM = "Pakka? Baad me rona mat. {action}? Haan ya nahi?"
 DENY = "Arre pagal hai kya? Mummy ko bataun?"
@@ -35,12 +36,13 @@ class Persona:
 
     async def say(self, task_id, text):
         async with self.speech_lock:
+            started = time.monotonic()
             self.bus.publish(task_id, "bubble" if self.mime else "speak", text=text, mime=self.mime)
             if self.audio and not self.mime and self.audio_sink:
                 try:
                     audio = await self.brain.tts(text)
                     if audio:
-                        await self.audio_sink(task_id, audio)
+                        await self.audio_sink(task_id, audio, started=started)
                 except Exception as exc:  # noqa: BLE001 - speech bubbles must survive TTS outages
                     self.bus.publish(
                         task_id,

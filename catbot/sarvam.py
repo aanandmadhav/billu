@@ -24,7 +24,7 @@ class Sarvam:
                         tool_choice="auto",
                         reasoning_effort=None,
                         max_tokens=400,
-                        request_options={"timeout_in_seconds": 12},
+                        request_options={"timeout_in_seconds": 12, "max_retries": 0},
                     ),
                     timeout=12,
                 )

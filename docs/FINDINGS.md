@@ -108,3 +108,35 @@ the generated app's actual JS handlers in an isolated logic test: plus, minus,
 reset and the zero lower bound all passed. This is not a browser/pointer test.
 Browser verification remains unavailable: browser host unavailable, Safari native
 access not approved. The server, API/event flow and app CSP are covered in tests.
+
+## P4 corrected realtime manual protocol (live verified)
+
+The earlier STT manual-end note was incomplete. Sending audio followed only by
+`RealtimeEnd()` produced `session.end` with `total_utterances:0` and no final.
+The working manual sequence is:
+
+1. Connect with `endpointing="manual", encoding="linear16", sample_rate="16000"`.
+2. `await socket.send_realtime_speech_start(RealtimeSpeechStart())`.
+3. Send 3,200-byte, base64 PCM frames through `send_realtime_audio_input`.
+4. `await socket.send_realtime_speech_end(RealtimeSpeechEnd())` on PTT release.
+5. Receive `transcript.final`, then send `RealtimeEnd()` to close the session.
+
+Verified with `python -m scripts.smoke_stt`, synthesizing Hindi speech in memory
+without accessing the microphone. Actual final:
+`{"event":"transcript.final","utterance_idx":0,"text":"Billu, aawaz kam karo","language":"en-IN","language_confidence":0.61}`.
+Many `transcript.partial` events preceded it, with `.text` and `.language` fields.
+SDK socket supports `async for event in socket`; events have `.model_dump()`.
+Use Hindi/Hinglish UI copy when language confidence is below 0.8.
+Official reference: https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/realtime-streaming .
+
+The full runtime pipeline also passed via `python -m scripts.smoke_voice_pipeline`:
+real synthesized Hindi -> runtime `VoiceSession` -> real Sarvam tool call -> real
+Laya -> policy/GateToken -> **fake** volume 50 to 40 -> real Hindi TTS WAV.
+Recognized final `aawaz kam karo`; called `set_volume {"action":"down"}`.
+Laya returned T1 **0.9784**, verify `wrong_tool` **0.4309** (below the 0.70 veto
+threshold, so policy correctly allowed). First runtime inference took **1156 ms**;
+this host must not be presented as a verified 50 ms machine. Reply WAV: **96044** bytes.
+No microphone or real volume was accessed. UI/browser microphone permission and
+actual loudspeaker playback remain unverified because computer use is unavailable.
+The JS resampler passed constant-signal, 100 ms frame size and final-padding checks
+at both 44.1 kHz and 48 kHz input rates (`node scripts/check_pcm.mjs`).

@@ -16,6 +16,7 @@ from catbot.sarvam import FakeSarvam, Sarvam
 from catbot.tools.code import CodeManager
 from catbot.tools.executor import Executor
 from catbot.tools.registry import validate
+from catbot.tools.web import WebTool
 
 
 def request_english(utterance):
@@ -37,10 +38,12 @@ class Runner:
         self.persona = Persona(self.bus, self.brain, audio=audio)
         self.code = CodeManager(settings, self.bus, self.persona, self.executor, self.laya.assess)
         self.executor.code = self.code
+        self.executor.web = WebTool(settings)
         self.payment_reader = None
         self.confirmer = confirmer
         self.pending = {}
         self.busy = False
+        self.active_task = None
         self.last_activity = time.monotonic()
         self.background = set()
 
@@ -88,7 +91,7 @@ class Runner:
         future.set_result(reply)
         return True
 
-    async def submit_transcript(self, text):
+    async def submit_transcript(self, text, task_id=None, lang="hi-IN"):
         text = strip_wakeword(text)
         if self.persona.is_payment(text):
             return "tease-payment"
@@ -96,23 +99,24 @@ class Runner:
             task_id = next(iter(self.pending))
             self.answer(task_id, text)
             return task_id
-        task_id = uuid4().hex
-        task = asyncio.create_task(self.run(text, task_id))
+        task_id = task_id or uuid4().hex
+        task = asyncio.create_task(self.run(text, task_id, lang=lang))
         self.background.add(task)
         task.add_done_callback(self.background.discard)
         return task_id
 
-    async def run(self, utterance, task_id=None):
+    async def run(self, utterance, task_id=None, *, lang="hi-IN"):
         task_id = task_id or uuid4().hex
         if self.busy:
             await self.persona.say(task_id, "Ek second. Billu is finishing the current request.")
             self.bus.publish(task_id, "done", ok=False, stopped_by="busy")
             return task_id
         self.busy = True
+        self.active_task = task_id
         self.last_activity = time.monotonic()
         try:
             async with asyncio.timeout(60):
-                await self._run(strip_wakeword(utterance), task_id)
+                await self._run(strip_wakeword(utterance), task_id, lang)
         except TimeoutError:
             await self.persona.deny(task_id, "The task exceeded its 60 second limit.")
             self.bus.publish(task_id, "done", ok=False, stopped_by="task_limits")
@@ -125,13 +129,14 @@ class Runner:
         finally:
             self.executor.revoke_task(task_id)
             self.busy = False
+            self.active_task = None
             self.last_activity = time.monotonic()
         return task_id
 
-    async def _run(self, utterance, task_id):
+    async def _run(self, utterance, task_id, lang="hi-IN"):
         start = time.monotonic()
         floor = utterance_floor(utterance)
-        self.bus.publish(task_id, "listen", final=utterance, lang="hi-IN")
+        self.bus.publish(task_id, "listen", final=utterance, lang=lang)
         self.bus.publish(task_id, "risk", floor=floor)
         if not await self.persona.tease(
             task_id,

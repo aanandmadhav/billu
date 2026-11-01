@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import io
+import json
 import time
 import wave
 from contextlib import asynccontextmanager
@@ -13,7 +14,9 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from catbot.config import ROOT
 from catbot.loop import Runner
+from catbot.voice import VoiceSession
 
 UI = Path(__file__).parent / "ui"
 
@@ -41,8 +44,11 @@ class AudioHub:
     def __init__(self):
         self.peers = set()
         self.pending = {}
+        self.interrupted_at = 0
 
-    async def speak(self, task_id, audio):
+    async def speak(self, task_id, audio, *, started=None):
+        if started is not None and started <= self.interrupted_at:
+            return
         peers = tuple(self.peers)
         if not peers:
             return
@@ -68,6 +74,12 @@ class AudioHub:
             pass
         finally:
             self.pending.pop(speech_id, None)
+
+    def interrupt(self):
+        self.interrupted_at = time.monotonic()
+        for future, _ in self.pending.values():
+            if not future.done():
+                future.set_result(False)
 
     def acknowledge(self, ws, speech_id):
         pending = self.pending.get(speech_id)
@@ -121,6 +133,8 @@ def create_app(settings, *, runner=None):
             )
         return await call_next(request)
 
+    fonts = UI / "fonts" if (UI / "fonts/gloock.woff2").is_file() else ROOT / "assets/fonts"
+    app.mount("/ui/fonts", StaticFiles(directory=fonts), name="fonts")
     app.mount("/ui", StaticFiles(directory=UI), name="ui")
 
     @app.get("/")
@@ -236,22 +250,60 @@ def create_app(settings, *, runner=None):
             await ws.close(code=1008)
             return
         await ws.accept()
-        audio.peers.add(ws)
+        session = None
         try:
             while True:
-                message = await ws.receive_json()
-                if message.get("type") == "played":
-                    audio.acknowledge(ws, message.get("speech_id"))
-                elif message.get("type") == "start":
+                packet = await ws.receive()
+                if packet["type"] == "websocket.disconnect":
+                    break
+                frame = packet.get("bytes")
+                if frame is not None:
+                    if session:
+                        try:
+                            await session.feed(frame)
+                        except ValueError as exc:
+                            await ws.send_json({"type": "error", "message": str(exc)})
+                            await session.cancel()
+                            session = None
+                    continue
+                try:
+                    message = json.loads(packet.get("text") or "{}")
+                except ValueError:
                     await ws.send_json(
-                        {
-                            "type": "error",
-                            "message": "Voice input arrives in P4. Type a command for now.",
-                        }
+                        {"type": "error", "message": "Invalid audio control message."}
                     )
+                    continue
+                kind = message.get("type")
+                if kind == "played":
+                    audio.acknowledge(ws, message.get("speech_id"))
+                elif kind == "playback":
+                    if message.get("enabled") is True:
+                        audio.peers.add(ws)
+                    else:
+                        audio.peers.discard(ws)
+                elif kind == "interrupt":
+                    audio.interrupt()
+                elif kind == "start":
+                    if session:
+                        await session.cancel()
+                    audio.interrupt()
+                    session = VoiceSession(runner, ws.send_json)
+                    session.start()
+                    await ws.send_json({"type": "recording", "fake": settings.fake})
+                elif kind == "stop" and session:
+                    try:
+                        await session.finish()
+                    except TimeoutError:
+                        await session.cancel()
+                        await ws.send_json(
+                            {"type": "error", "message": "Voice connection timed out."}
+                        )
+                    session = None
         except (WebSocketDisconnect, RuntimeError, ValueError):
             pass
         finally:
+            if session:
+                await session.cancel()
             audio.peers.discard(ws)
 
     return app

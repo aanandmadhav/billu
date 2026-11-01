@@ -7,7 +7,7 @@ name = "catbot"
 version = "0.1.0"
 description = "Catbot: Billu, the safety-gated Delhi desktop cat"
 requires-python = ">=3.12"
-dependencies = ["pydantic>=2", "pyyaml", "python-dotenv", "httpx", "fastapi", "uvicorn[standard]", "sarvamai==0.1.41", "exa-py", "laya==0.4.18"]
+dependencies = ["pydantic>=2,<3", "pyyaml", "python-dotenv", "httpx", "fastapi", "uvicorn[standard]", "sarvamai==0.1.41", "exa-py==2.27.0", "laya==0.4.18"]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-asyncio", "ruff"]
