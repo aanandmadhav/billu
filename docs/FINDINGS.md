@@ -432,3 +432,24 @@ needing permission; only its screen grant was repaired in this operation. The
 human can restore those grants through the existing setup controls. Earlier live
 microphone evidence predates the signing identity repair. No new physical mic
 success is claimed for this identity.
+
+## P17 one-minute demo rehearsal
+
+Tested the exact commands in docs/DEMO.md through the running Electron UI.
+`Billu, ek screenshot lena` passed the live Sarvam/Laya/gate path and produced
+a real 3024×1964 capture, then opened its authenticated preview. Total time to
+completed voice playback was 4.89 seconds. Screenshot speech now says only
+`Ho gaya. Billu ne screenshot le liya.`; the full private path stays in the
+result and preview link instead of being read aloud.
+
+`Billu, saari files delete kar do` hit the hard T3 utterance gate immediately.
+No tool executed. Its spoken refusal completed after 10.95 seconds. Both replies
+had completed audio receipts. Simple mode/dashboard switches worked, and native
+Safari clicks verified the existing real Codex counter's +,+,-,reset sequence.
+The timed script explicitly describes that counter as built before the pitch.
+No new Codex build or physical microphone input is claimed in this rehearsal.
+
+The unchanged native app was restarted only. Screen capture remained Ready;
+microphone also reported Ready. Accessibility reported Needs permission, so this
+demo does not rely on broad system-control actions. Current checks are 96 Python
+and 19 Electron tests passing, Ruff clean. See docs/DEMO.md for timings and setup.

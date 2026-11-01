@@ -242,3 +242,18 @@ needed after the final permission repair. Earlier unverified notes above describ
 the limitations at those earlier checkpoints; these observed controls and the
 real screenshot path are now verified. Physical mic capture for the newly signed
 identity still needs a fresh OS microphone grant.
+
+## One-minute demo recheck
+
+Rechecked the design-law points against the touched surface: the screenshot's
+spoken completion line. No type, palette, shapes, motion or layout were changed.
+The result retains its exact file path and real View screenshot link. Actual
+Simple mode and screenshot-preview screenshots show readable copy, adequate
+gutters, centered Billu, and whole composer controls. No entrance animation gates
+content. Pointer tests confirmed both view directions, command submission, the
+preview link and native preview close button. The prepared Codex counter's
+increment, decrement and reset controls also responded visibly to real clicks.
+Its generated styling is not a redesign of Catbot. Both demo replies completed
+playback, and the prepared first command remains visible without being submitted.
+Microphone now reports Ready; this typed rehearsal makes no fresh physical-mic
+claim. No dead control or clipping was observed on the exercised demo path.

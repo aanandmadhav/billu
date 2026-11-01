@@ -174,3 +174,29 @@ async def test_electron_capture_transport_uses_only_private_loopback_endpoint(
     executor.settings.capture_endpoint = "https://example.com/capture"
     assert not (await execute(executor)).ok
     assert len(seen) == 1
+
+
+async def test_successful_capture_keeps_path_in_result_without_reading_opaque_id_aloud():
+    from catbot.contracts import ToolResult
+
+    capture_id = "a" * 32
+    runner = Runner(Settings(fake=True))
+
+    async def capture(call):
+        return ToolResult(
+            ok=True,
+            summary=f"Saved screenshot to sandbox/captures/{capture_id}.png",
+            data={"capture_id": capture_id, "path": f"sandbox/captures/{capture_id}.png"},
+        )
+
+    runner.executor.fake.run = capture
+    await runner.run("Billu, ek screenshot lena")
+    events = list(runner.bus.history)
+    result = next(e for e in events if e.stage == "result")
+    speech = next(e for e in events if e.stage == "speak")
+    assert capture_id in result.payload["data"]["path"]
+    assert capture_id not in speech.payload["text"]
+    assert len(speech.payload["text"]) < 80
+    assert events[-1].payload["ok"]
+    assert sum(e.stage == "execute" for e in events) == 1
+    await runner.close()

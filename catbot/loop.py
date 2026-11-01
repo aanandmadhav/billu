@@ -300,7 +300,10 @@ class Runner:
                     )
                     return
                 if call.tool == "take_screenshot":
-                    await self.persona.say(task_id, result.summary)
+                    spoken = (
+                        "Ho gaya. Billu ne screenshot le liya." if result.ok else result.summary
+                    )
+                    await self.persona.say(task_id, spoken)
                     self.bus.publish(
                         task_id,
                         "done",
