@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "catbot"
+version = "0.1.0"
+description = "Catbot: Billu, the safety-gated Delhi desktop cat"
+requires-python = ">=3.12"
+dependencies = ["pydantic>=2", "pyyaml", "python-dotenv", "httpx", "fastapi", "uvicorn[standard]", "sarvamai==0.1.41", "exa-py", "laya==0.4.18"]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "ruff"]
+windows = ["pycaw", "comtypes"]
+
+[tool.setuptools.packages.find]
+include = ["catbot*"]
+
+[tool.setuptools.package-data]
+catbot = ["ui/*", "ui/fonts/*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+
