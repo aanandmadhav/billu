@@ -1,0 +1,70 @@
+@font-face { font-family: "Gloock"; src: url("fonts/gloock.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Urbanist"; src: url("fonts/urbanist.woff2") format("woff2");
+  font-weight: 400 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "Urbanist"; src: url("fonts/urbanist-italic.woff2") format("woff2");
+  font-weight: 400 800; font-style: italic; font-display: swap; }
+@font-face { font-family: "Inter"; src: url("fonts/inter-var.ttf") format("truetype");
+  font-weight: 100 900; font-style: normal; font-display: swap; }
+
+:root {
+  --font-display: "Gloock", "Nirmala UI", "Kohinoor Devanagari", Georgia, serif;
+  --font-ui:      "Urbanist", "Nirmala UI", "Kohinoor Devanagari", system-ui, sans-serif;
+  --font-data:    "Inter", "Nirmala UI", system-ui, sans-serif;
+  --font-code:    "Cascadia Code", Consolas, ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* canvas */
+  --c-bg:        #0B0A10;   /* ink */
+  --c-surface-1: #14121C;   /* cards */
+  --c-surface-2: #1C1A27;   /* raised, inputs, hover */
+  --c-line:      rgba(244, 239, 230, 0.08);
+  --c-line-strong: rgba(244, 239, 230, 0.16);
+
+  /* text */
+  --c-paper:  #F4EFE6;   /* primary text      17.2 / 16.2 / 15.0 */
+  --c-muted:  #A9A4B8;   /* secondary text     8.2 /  7.7 /  7.1 */
+  --c-faint:  #7C778C;   /* decorative / >=18px only: 4.6 / 4.3 / 4.0 */
+
+  /* brand + stage accents (all >= 5.4:1 on every surface) */
+  --c-catnip:  #C6FF3D;  /* hero accent, allow, act, done        16.7 */
+  --c-saffron: #FFA62B;  /* confirm, asking, ask_followup        10.1 */
+  --c-chili:   #FF5468;  /* deny, blocked, destructive            6.3 */
+  --c-magenta: #FF5BD8;  /* listening, voice, transcript          7.3 */
+  --c-violet:  #9C8CFF;  /* Laya, routing, thinking               7.1 */
+  --c-cyan:    #5EE6EB;  /* tools, args, results, data            13.1 */
+
+  --c-on-accent: #0B0A10; /* text on any filled accent: >= 6.3:1 */
+
+  /* glows (use sparingly: active element only) */
+  --glow-catnip:  0 0 0 1px rgba(198,255,61,.35), 0 0 32px rgba(198,255,61,.18);
+  --glow-violet:  0 0 0 1px rgba(156,140,255,.35), 0 0 32px rgba(156,140,255,.18);
+  --glow-saffron: 0 0 0 1px rgba(255,166,43,.40), 0 0 32px rgba(255,166,43,.20);
+  --glow-chili:   0 0 0 1px rgba(255,84,104,.45), 0 0 32px rgba(255,84,104,.22);
+  --glow-magenta: 0 0 0 1px rgba(255,91,216,.40), 0 0 32px rgba(255,91,216,.20);
+}
+
+:root {
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px;
+  --s-6: 32px; --s-7: 48px; --s-8: 64px; --s-9: 96px;
+
+  --r-sm: 8px; --r-md: 14px; --r-lg: 22px; --r-xl: 32px; --r-pill: 999px;
+
+  --shadow-card: 0 1px 0 rgba(244,239,230,.04) inset, 0 24px 48px -24px rgba(0,0,0,.6);
+
+  --z-base: 0; --z-card: 10; --z-sticky: 20; --z-overlay: 40; --z-sheet: 100; --z-toast: 1000;
+}
+
+:root {
+  --ease-out: cubic-bezier(.16, 1, .3, 1);     /* enter */
+  --ease-in:  cubic-bezier(.7, 0, .84, 0);     /* exit */
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1); /* stickers, cat pop */
+  --d-fast: 140ms; --d-base: 220ms; --d-slow: 380ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
