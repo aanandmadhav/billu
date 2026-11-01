@@ -65,13 +65,30 @@ test("simple mode preserves live confirmation controls and restores their dashbo
       this.listeners[key] = callback;
     }
   }
-  const nodes = new Map();
-  const get = (id) => {
-    if (!nodes.has(id)) nodes.set(id, new Element(id));
-    return nodes.get(id);
-  };
+  const html = fs.readFileSync(
+    path.resolve(__dirname, "../../catbot/ui/index.html"),
+    "utf8",
+  );
+  const nodes = new Map(
+    [...html.matchAll(/\bid="([^"]+)"/g)].map((match) => [
+      match[1],
+      new Element(match[1]),
+    ]),
+  );
+  const get = (id) => nodes.get(id) || null;
+  for (const id of [
+    "activity-pane",
+    "verdict-card",
+    "confirm-timer",
+    "confirm-actions",
+    "code",
+    "simple-feedback",
+    "cat-stage",
+    "view-mode",
+  ])
+    assert.ok(get(id), `Missing real dashboard element: ${id}`);
   const pane = get("activity-pane"),
-    verdict = get("verdict");
+    verdict = get("verdict-card");
   pane.append(verdict);
   verdict.append(get("confirm-timer"));
   verdict.append(get("confirm-actions"));

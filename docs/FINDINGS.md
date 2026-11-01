@@ -252,3 +252,15 @@ OS prompt but never navigate to Settings; the explicit Enable microphone action
 retains that navigation. A regression check repeats denied capture requests and
 asserts there is no navigation before the explicit setup request. Restarting can
 apply a grant made in Settings, but cannot itself grant microphone access.
+
+
+## Simple mode initialization fix
+
+The coding panel had class `code` but no ID `code`. The mode controller requested
+that ID while preparing the controls to move, causing a null-element exception
+before the click listener was registered. The panel now has the expected ID.
+The regression test constructs its available elements from the actual HTML IDs,
+rather than inventing any element requested by the test. It failed before this
+fix and passes after it. Mode initialization failures also surface a visible
+message instead of leaving a silently inactive control. Rebuilding alone did
+not resolve the original missing-element error.

@@ -64,5 +64,5 @@ setInterval(()=>{if(state.confirmUntil)$('confirm-timer').textContent=`${Math.ma
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');if(matchMedia('(pointer:fine)').matches){$('pet-cat').addEventListener('pointermove',e=>{if(reduced.matches)return;const box=e.currentTarget.getBoundingClientRect();const x=Math.max(-4,Math.min(4,(e.clientX-box.left-box.width/2)/25));const y=Math.max(-4,Math.min(4,(e.clientY-box.top-box.height/2)/25));document.querySelector('.pupils').style.transform=`translate(${x}px,${y}px)`;});$('pet-cat').addEventListener('pointerleave',()=>document.querySelector('.pupils').style.removeProperty('transform'));}
 connectEvents();loadStats();setInterval(loadStats,5000);
 
-setupViewMode();
+setupViewMode().catch(()=>notice('View controls could not start. Reload Catbot.'));
 setupDesktop(audio,notice);
