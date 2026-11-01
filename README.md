@@ -192,3 +192,10 @@ preview windows without the native bridge or microphone access.
 Additional checks: `npm test` covers backend ownership/authentication/shutdown,
 native permission routing and audible-mode playback paths. `npm run smoke:electron`
 checks the installed runtime APIs and exercises its PCM and system-speech output.
+
+If voice input reports **No audio was recorded**, hold Space (or the talk button)
+while saying the whole command, then release. **Microphone sent only silence**
+means the stream opened but carried no signal: check the selected input in system
+Sound settings. Empty recordings are now rejected locally; they do not cause a
+Sarvam RuntimeError. Authentication, quota and transcription failures have separate
+messages, and failed captures stop automatically. No recording is saved to disk.

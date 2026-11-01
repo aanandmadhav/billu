@@ -20,6 +20,8 @@ export class AudioController {
       onState: null,
       flushed: null,
       userMuted: false,
+      captureEpoch: 0,
+      stopping: false,
     });
     this.connect();
   }
@@ -44,7 +46,10 @@ export class AudioController {
         return;
       }
       if (data.type === "tts") await this.play(data);
-      if (data.type === "error") this.notice(data.message);
+      if (data.type === "error") {
+        this.notice(data.message);
+        if (data.stop_recording) await this.stop();
+      }
     };
     this.socket.onclose = () => {
       this.stopPlayback();
@@ -179,11 +184,18 @@ export class AudioController {
     if ("speechSynthesis" in window) speechSynthesis.cancel();
   }
   async start() {
+    if (this.stopping) {
+      this.notice("Finishing the last recording. Press and hold again.");
+      return false;
+    }
+    if (this.recording) return false;
+    const captureEpoch = ++this.captureEpoch;
     if (this.fake === null) {
       this.notice("Connecting to Billu. Try again in a moment.");
       return false;
     }
     await this.ensureEnabled();
+    if (captureEpoch !== this.captureEpoch) return false;
     this.stopPlayback();
     this.control({ type: "interrupt" });
     if (this.recording) return false;
@@ -209,7 +221,7 @@ export class AudioController {
           noiseSuppression: true,
         },
       });
-      if (!this.recording) {
+      if (!this.recording || captureEpoch !== this.captureEpoch) {
         stream.getTracks().forEach((track) => track.stop());
         return false;
       }
@@ -218,13 +230,15 @@ export class AudioController {
         await this.context.audioWorklet.addModule("/ui/pcm-worklet.js");
         this.workletLoaded = true;
       }
-      if (!this.recording) {
-        this.cleanupCapture();
+      if (!this.recording || captureEpoch !== this.captureEpoch) {
+        stream.getTracks().forEach((track) => track.stop());
+        if (this.stream === stream) this.cleanupCapture();
         return false;
       }
       this.source = this.context.createMediaStreamSource(stream);
       this.worklet = new AudioWorkletNode(this.context, "billu-pcm");
       this.worklet.port.onmessage = (event) => {
+        if (captureEpoch !== this.captureEpoch) return;
         const data = event.data;
         if (data.pcm && this.socket?.readyState === WebSocket.OPEN) {
           if (this.socket.bufferedAmount > 32000 * 5) {
@@ -240,12 +254,26 @@ export class AudioController {
           this.flushed = null;
         }
       };
+      this.worklet.onprocessorerror = () => {
+        if (captureEpoch !== this.captureEpoch) return;
+        this.notice("Microphone processing stopped. Release and try again.");
+        this.stop();
+      };
+      for (const track of stream.getTracks())
+        track.onended = () => {
+          if (captureEpoch !== this.captureEpoch) return;
+          this.notice(
+            "The microphone disconnected. Reconnect it and try again.",
+          );
+          this.stop();
+        };
       this.control({ type: "start" });
       this.source.connect(this.worklet);
       this.worklet.connect(this.context.destination);
       this.maxTimer = setTimeout(() => this.stop(), 30000);
       return true;
     } catch (error) {
+      if (captureEpoch !== this.captureEpoch) return false;
       this.recording = false;
       this.cleanupCapture();
       this.notice(
@@ -257,20 +285,30 @@ export class AudioController {
     }
   }
   async stop() {
-    if (!this.recording) return;
+    if (this.stopping) return;
+    if (!this.recording) {
+      this.captureEpoch++;
+      return;
+    }
+    this.stopping = true;
     this.recording = false;
     clearTimeout(this.maxTimer);
-    if (this.worklet)
-      await new Promise((resolve) => {
-        this.flushed = resolve;
-        this.worklet.port.postMessage({ type: "flush" });
-        setTimeout(resolve, 250);
-      });
-    this.cleanupCapture();
-    this.control({ type: "stop" });
-    this.onLevel?.(0);
+    try {
+      if (this.worklet)
+        await new Promise((resolve) => {
+          this.flushed = resolve;
+          this.worklet.port.postMessage({ type: "flush" });
+          setTimeout(resolve, 250);
+        });
+    } finally {
+      this.cleanupCapture();
+      this.control({ type: "stop" });
+      this.onLevel?.(0);
+      this.stopping = false;
+    }
   }
   cleanupCapture() {
+    this.captureEpoch++;
     clearTimeout(this.maxTimer);
     this.source?.disconnect();
     this.worklet?.disconnect();

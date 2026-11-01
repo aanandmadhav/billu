@@ -212,3 +212,32 @@ The packaged `Catbot.app` also passed its own live `--smoke` run with provider
 Permission sequencing has a regression test: previously denied microphone access
 stays on that settings step; Accessibility is requested after microphone grant,
 so one settings pane cannot immediately replace the other.
+
+## P7 voice-input RuntimeError fix
+
+Live reproduction on 2026-11-01:
+- Normal synthesized Hindi still returned a final transcript successfully.
+- Manual `speech_start` followed immediately by `speech_end` with **zero audio
+  frames** returned `{"event":"error","code":"transcriber_error","message":
+  "Transcription failed for utterance 0.","is_fatal":false}`.
+- One and ten all-zero frames returned an empty `transcript.final`.
+The old runtime collapsed provider error and early session end into RuntimeError.
+This reproduces the reported message; it does not establish which recording or
+microphone state the user had on their physical machine.
+
+The runtime now waits for nonzero PCM before connecting to Sarvam, preserving a
+200 ms pre-roll. Empty presses and digital-silence captures produce local,
+actionable messages without opening a service connection. Real speech remains
+streamed immediately, and only final transcripts can start actions. Structured
+provider errors distinguish authentication, quota, transcription and connection
+failures. Diagnostics record only safe code, duration and peak, never audio or
+raw provider payloads. Voice errors stop recording and close the capture graph.
+
+Capture requests use a generation counter so a delayed permission result from
+an earlier press cannot replace or stop the next microphone stream. Releasing
+while Web Audio unlocks cannot start the microphone later. Processor failure and
+microphone disconnection stop capture explicitly.
+
+The full live `scripts.smoke_voice_pipeline` passed after the fix: real STT,
+Sarvam chat, Laya and TTS, with fake volume 40 and a 180524-byte reply WAV. No
+physical microphone or real volume action was used by the probe.
