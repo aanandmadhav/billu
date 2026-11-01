@@ -18,6 +18,8 @@ class Settings:
     sarvam_key: str = field(default="", repr=False)
     exa_key: str = field(default="", repr=False)
     desktop_token: str = field(default="", repr=False)
+    capture_endpoint: str = field(default="", repr=False)
+    capture_token: str = field(default="", repr=False)
     os_name: str = platform.system().lower()
 
     @classmethod
@@ -36,6 +38,8 @@ class Settings:
             sandbox=sandbox,
             model_dir=(ROOT / os.getenv("LAYA_MODEL_DIR", "models/laya")).resolve(),
             desktop_token=os.getenv("CATBOT_DESKTOP_TOKEN", ""),
+            capture_endpoint=os.getenv("CATBOT_CAPTURE_ENDPOINT", ""),
+            capture_token=os.getenv("CATBOT_CAPTURE_TOKEN", ""),
             sarvam_key=os.getenv("SARVAM_API_KEY", ""),
             exa_key=os.getenv("EXA_API_KEY", ""),
         )

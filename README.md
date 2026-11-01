@@ -162,7 +162,7 @@ npm install
 npm start
 # Offline demo with audible system speech:
 npm run start:fake
-# Make a local double-clickable app:
+# Make a locally ad-hoc-signed, double-clickable app:
 npm run package
 ```
 
@@ -170,7 +170,11 @@ On macOS the local build appears under `dist/Catbot-darwin-arm64/Catbot.app`
 (or the host architecture equivalent). This is a local desktop build using this
 checkout's `.venv`, `.env`, assets and Laya model. Keep the checkout in place; use
 `CATBOT_PROJECT_DIR` if you move it. It is not a self-contained installer with a
-bundled Python/Torch runtime. No `.env` or model weights are copied into the app.
+bundled Python/Torch runtime. No `.env` or model weights are copied into the app. macOS packaging signs the
+renamed bundle locally and verifies its Catbot identity and sealed resources.
+This local signature is not a Developer ID/notarized distribution build. Open
+the packaged app through Finder; an IDE-launched inner executable can inherit
+the IDE's environment and privacy attribution.
 
 The first live launch requests microphone permission and offers the native
 Accessibility approval flow. Click along with the OS prompts. Previously denied
@@ -213,7 +217,10 @@ Say or type **Billu, ek screenshot lena**. The dedicated `take_screenshot` tool
 passes through Laya and the policy gate, captures the main display as a PNG and
 saves a unique file in `sandbox/captures/`. **View screenshot** opens the image.
 The image stays local; only its path and dimensions enter the conversation.
-The tool accepts no filename, command or capture flags from the model. Arbitrary
+In Electron, the main process uses `desktopCapturer` through a private authenticated
+loopback bridge called only by the gated backend. Standalone macOS serving uses
+the fixed system screenshot command. The tool accepts no filename, command or
+capture flags from the model. Arbitrary
 `screencapture` shell commands remain blocked. Capture is currently macOS-only.
 A failed capture stops immediately with permission help. Fake mode accesses no
 screen and writes no image.

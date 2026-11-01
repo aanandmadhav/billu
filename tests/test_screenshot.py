@@ -139,3 +139,38 @@ async def test_capture_preview_auth_and_symlink_protection(tmp_path, monkeypatch
         target.unlink()
         target.symlink_to(__file__)
         assert client.get(url, headers=headers).status_code == 404
+
+
+async def test_electron_capture_transport_uses_only_private_loopback_endpoint(
+    tmp_path, monkeypatch
+):
+    import httpx
+
+    seen = []
+
+    async def handle(request):
+        seen.append(request)
+        assert request.method == "POST"
+        assert request.headers["authorization"] == "Bearer native-private-token"
+        return httpx.Response(200, content=png_header())
+
+    original_client = httpx.AsyncClient
+    monkeypatch.setattr(
+        "catbot.tools.screenshot.httpx.AsyncClient",
+        lambda **kwargs: original_client(transport=httpx.MockTransport(handle), **kwargs),
+    )
+    executor = Executor(
+        Settings(
+            fake=False,
+            sandbox=tmp_path,
+            capture_endpoint="http://127.0.0.1:12345/capture",
+            capture_token="native-private-token",
+        ),
+        EventBus(),
+    )
+    result = await execute(executor)
+    assert result.ok and result.data["width"] == 640
+    assert len(seen) == 1
+    executor.settings.capture_endpoint = "https://example.com/capture"
+    assert not (await execute(executor)).ok
+    assert len(seen) == 1

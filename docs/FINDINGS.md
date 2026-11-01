@@ -329,3 +329,70 @@ Validation on 2026-11-01:
   and the task ended as screenshot_failed instead of looping. At that point the
   packaged app reported screen permission denied. Real PNG capture awaits the
   human enabling Catbot's screen permission and relaunching.
+
+
+## P15 packaged signing identity and permission recheck
+
+After the human enabled Catbot and a restart, screen status still reported denied
+and a gated live capture failed. Inspection found that the original packager
+output retained the Electron linker signature: Identifier=Electron, Info.plist
+not bound, Sealed Resources=none. `codesign --verify --deep --strict` failed with
+"code has no resources but signature indicates they must be present".
+
+The packager now uses its installed @electron/osx-sign integration with a local
+ad-hoc identity, identityValidation=false, preAutoEntitlements=false,
+preEmbedProvisioningProfile=false, and per-file hardenedRuntime=false with no
+timestamp. No developer certificate or notarization was used. After packaging,
+strict verification succeeds, the identifier is dev.hacksmith.catbot, Info.plist
+is bound and resources are sealed. Packaging now verifies these properties and
+fails if the identity is wrong. Official reference:
+https://packages.electronjs.org/packager/v20.2.0/interfaces/Options.html#osxsign .
+
+Launch the packaged app through Finder or Launch Services (`env -u
+ELECTRON_RUN_AS_NODE open -a <Catbot.app>`), rather than directly executing the
+inner binary from an IDE. The IDE-provided ELECTRON_RUN_AS_NODE also affected the
+first Launch Services diagnostic attempt; removing it restores normal startup.
+
+The corrected identity is treated as a new app by macOS: its initial diagnostics
+reported microphone not-determined, screen denied, Accessibility not-granted.
+The old permission entry must be replaced with the rebuilt copy and enabled;
+this is an OS grant that the agent cannot supply. Real capture retesting is
+pending that regrant. No capture success has been claimed.
+
+
+### Native capture transport and final permission test
+
+To remove child-process permission attribution ambiguity, Electron now owns
+screen capture via `desktopCapturer.getSources` with screen-only sources,
+main-display dimensions, no window icons, and a 12-second deadline. A private
+loopback HTTP transport accepts only POST /capture with a distinct random bearer
+token supplied to the Python child in memory. The gated screenshot tool is its
+only application caller; the renderer receives neither endpoint nor token.
+Requests with bodies, arbitrary paths, missing credentials, or fake mode are
+rejected. Fake mode never calls desktopCapturer. The Python receiver accepts only
+a loopback /capture endpoint and limits PNG transfers to 50 MB before storing the
+unique sandbox file. The shell fallback remains only for standalone macOS use.
+Tokens are hidden from Settings repr and added to event redaction.
+
+Unit checks pass for the native transport's authentication, fixed display/source
+options, actual HTTP status behavior, fake-mode isolation and Python transport
+confinement. Current totals: 95 Python + 19 Electron tests; Ruff clean. The signed
+bundle starts through Launch Services and passes deep strict codesign verification.
+Packager returns output directories, so post-sign verification resolves their
+Catbot.app child rather than checking the parent directory.
+
+After the human re-enabled the final native build and macOS reopened it, a normal
+Sarvam/Laya-gated screenshot still failed. A separate gated transport diagnostic
+confirmed native HTTP 403 application/json with error=screen_capture_failed,
+ruling out wrong credentials/malformed request as the cause. No PNG was produced.
+Screen status continues to be denied. The current local ad-hoc designated
+requirement is a code hash; no valid Developer ID or Apple Development signing
+identity is installed. This is diagnostic context, not proof that a Developer ID
+would resolve the permission issue. No bypass or false permission status was added.
+
+Native System Settings inspection was refused with "Computer Use permissions are
+not granted". Both relevant TCC databases were unavailable for read-only queries.
+The next diagnostic input needed is a human screenshot of Catbot's row in Screen
+& System Audio Recording. The final build is frozen so further code signing does
+not invalidate the permission while that state is checked. Real capture is still
+unverified and is not reported as working.

@@ -253,7 +253,9 @@ Lines, moods, sounds and the tease script are in `docs/CHARACTER.md`. Engine rul
 
 `take_screenshot {}` captures one main-display PNG on macOS, through the same
 Laya/policy/GateToken executor. The schema accepts no model-selected paths or
-flags. A generated capture ID maps only to sandbox/captures/<id>.png. The file
+flags. In Electron, a private authenticated backend-to-main-process bridge performs the
+native capture; standalone macOS serving uses a fixed screencapture argv. A
+generated capture ID maps only to sandbox/captures/<id>.png. The file
 can be viewed through the authenticated local /captures/<id>.png route. Screen
 Recording permission is required; the desktop setup offers an explicit Enable
 screenshots action. Failed captures stop the request with permission help.

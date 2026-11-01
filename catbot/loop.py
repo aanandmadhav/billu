@@ -32,7 +32,16 @@ class Runner:
     def __init__(self, settings, *, bus=None, brain=None, laya=None, confirmer=None, audio=False):
         self.settings = settings
         self.bus = bus or EventBus()
-        self.bus.secrets = tuple(key for key in (settings.sarvam_key, settings.exa_key) if key)
+        self.bus.secrets = tuple(
+            key
+            for key in (
+                settings.sarvam_key,
+                settings.exa_key,
+                settings.desktop_token,
+                settings.capture_token,
+            )
+            if key
+        )
         self.brain = brain or (FakeSarvam() if settings.fake else Sarvam(settings))
         self.laya = laya or LayaGate(settings.model_dir)
         self.executor = Executor(settings, self.bus)

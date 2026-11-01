@@ -1,5 +1,7 @@
 import { packager } from "@electron/packager";
 import { buildIcon } from "./icon.mjs";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { mkdir, writeFile } from "node:fs/promises";
 import { existsSync, readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -38,6 +40,19 @@ const bundles = await packager({
   dir: root,
   name: "Catbot",
   appBundleId: "dev.hacksmith.catbot",
+  // Local development identity: seal the renamed bundle and its helpers after
+  // packaging so macOS sees Catbot, rather than the original Electron linker ID.
+  ...(process.platform === "darwin"
+    ? {
+        osxSign: {
+          identity: "-",
+          identityValidation: false,
+          preAutoEntitlements: false,
+          preEmbedProvisioningProfile: false,
+          optionsForFile: () => ({ hardenedRuntime: false, timestamp: "none" }),
+        },
+      }
+    : {}),
   appVersion: "0.1.0",
   out: path.join(root, "dist"),
   overwrite: true,
@@ -58,4 +73,24 @@ const bundles = await packager({
     Microphone: "Billu listens while you hold the talk button.",
   },
 });
+if (process.platform === "darwin") {
+  for (const directory of bundles) {
+    const bundle = path.join(directory, "Catbot.app");
+    await promisify(execFile)("/usr/bin/codesign", [
+      "--verify",
+      "--deep",
+      "--strict",
+      bundle,
+    ]);
+    const { stderr } = await promisify(execFile)("/usr/bin/codesign", [
+      "-dv",
+      "--verbose=2",
+      bundle,
+    ]);
+    if (!stderr.includes("Identifier=dev.hacksmith.catbot\n"))
+      throw new Error(
+        "Packaged app does not have the Catbot signing identity.",
+      );
+  }
+}
 console.log(bundles.join("\n"));

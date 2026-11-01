@@ -1,7 +1,10 @@
 """One main-display PNG, with no model-selected executable, flags or output path."""
 
 import struct
+from urllib.parse import urlsplit
 from uuid import uuid4
+
+import httpx
 
 from catbot.contracts import ToolResult
 from catbot.tools.shell import bounded_process, confined_path, scrubbed_env
@@ -12,7 +15,7 @@ class ScreenshotTool:
         self.settings = settings
 
     async def __call__(self, _args):
-        if self.settings.os_name != "darwin":
+        if self.settings.os_name != "darwin" and not self.settings.capture_endpoint:
             return ToolResult(ok=False, summary="Screenshot capture currently supports macOS only.")
         root = self.settings.sandbox
         directory = confined_path(root, "captures")
@@ -24,12 +27,45 @@ class ScreenshotTool:
             pass
         complete = False
         try:
-            code, _, _ = await bounded_process(
-                ["/usr/sbin/screencapture", "-x", "-m", "-t", "png", str(target)],
-                cwd=root,
-                env=scrubbed_env(root),
-                timeout=15,
-            )
+            if self.settings.capture_endpoint:
+                endpoint = urlsplit(self.settings.capture_endpoint)
+                if (
+                    endpoint.scheme != "http"
+                    or endpoint.hostname != "127.0.0.1"
+                    or not endpoint.port
+                    or endpoint.path != "/capture"
+                    or endpoint.query
+                    or endpoint.fragment
+                    or endpoint.username
+                    or not self.settings.capture_token
+                ):
+                    raise ValueError("Invalid local screenshot bridge.")
+                async with (
+                    httpx.AsyncClient(timeout=15, trust_env=False) as client,
+                    client.stream(
+                        "POST",
+                        self.settings.capture_endpoint,
+                        headers={"Authorization": "Bearer " + self.settings.capture_token},
+                    ) as response,
+                ):
+                    code = 0 if response.status_code == 200 else 1
+                    if not code:
+                        size = 0
+                        with target.open("wb") as image:
+                            async for block in response.aiter_bytes():
+                                size += len(block)
+                                if size > 50 * 1024 * 1024:
+                                    raise ValueError(
+                                        "Screenshot exceeded the local image size limit."
+                                    )
+                                image.write(block)
+            else:
+                code, _, _ = await bounded_process(
+                    ["/usr/sbin/screencapture", "-x", "-m", "-t", "png", str(target)],
+                    cwd=root,
+                    env=scrubbed_env(root),
+                    timeout=15,
+                )
             if code:
                 return ToolResult(
                     ok=False,
@@ -55,7 +91,7 @@ class ScreenshotTool:
                     "height": height,
                 },
             )
-        except TimeoutError:
+        except (TimeoutError, httpx.HTTPError):
             return ToolResult(
                 ok=False,
                 summary="Screen capture timed out. Check Catbot's Screen Recording permission and try again.",

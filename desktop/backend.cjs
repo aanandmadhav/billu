@@ -31,12 +31,14 @@ function pythonPath(root) {
     );
   return python;
 }
-async function startBackend(root, fake) {
+async function startBackend(root, fake, capture = {}) {
   const token = randomBytes(32).toString("hex");
   const env = {
     ...process.env,
     CATBOT_DESKTOP_TOKEN: token,
     PYTHONUNBUFFERED: "1",
+    CATBOT_CAPTURE_ENDPOINT: capture.endpoint || "",
+    CATBOT_CAPTURE_TOKEN: capture.token || "",
   };
   delete env.ELECTRON_RUN_AS_NODE;
   const child = spawn(

@@ -7,10 +7,13 @@ const {
   session,
   shell,
   systemPreferences,
+  desktopCapturer,
+  screen,
 } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs");
 const { startBackend, projectRoot } = require("./backend.cjs");
+const { startCaptureBridge } = require("./capture.cjs");
 const { Permissions } = require("./permissions.cjs");
 const { viewPreferences } = require("./view-preferences.cjs");
 const {
@@ -20,6 +23,7 @@ const {
 } = require("./security.cjs");
 const fake = process.argv.includes("--fake");
 let backend,
+  captureBridge,
   window,
   quitting = false;
 app.setName("Catbot");
@@ -78,7 +82,12 @@ async function preview(url) {
 }
 async function start() {
   const root = projectRoot(process.resourcesPath, app.isPackaged);
-  backend = await startBackend(root, fake);
+  captureBridge = await startCaptureBridge({
+    desktopCapturer,
+    screen,
+    isFake: () => backend?.fake ?? true,
+  });
+  backend = await startBackend(root, fake, captureBridge);
   const permissions = new Permissions({
     systemPreferences,
     shell,
@@ -258,8 +267,10 @@ async function start() {
 }
 app.on("window-all-closed", () => app.quit());
 app.on("before-quit", (event) => {
-  if (quitting || !backend) return;
+  if (quitting || (!backend && !captureBridge)) return;
   event.preventDefault();
   quitting = true;
-  backend.stop().finally(() => app.quit());
+  Promise.all([backend?.stop(), captureBridge?.close()]).finally(() =>
+    app.quit(),
+  );
 });
