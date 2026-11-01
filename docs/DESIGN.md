@@ -188,6 +188,8 @@ Rules:
 
 ## 6. Layout
 
+**Simple mode (user direction):** The button beside Billu's name switches to a centered companion area with Billu, his reply/transcript and the text/voice composer. Hide the top bar and activity panels. The same button becomes Full dashboard. Preserve active confirmations, coding feedback and generated-app links in the companion area; give-chai controls appear when Billu requests them. The desktop preference lives in Electron user data rather than the changing local server origin. Settings remain accessible by returning to the dashboard.
+
 **Current desktop layout (user direction):** At 850px and wider, keep Billu's chat and command area in a stationary left pane. The right activity pane contains the permission setup and all decision panels, including 04 (Billu's plan) and 07 (What just happened), and scrolls independently. The footer belongs to that right pane. On short windows or enlarged text, the left pane may scroll internally so controls remain reachable. Smaller screens retain the flowing responsive layout. This supersedes the desktop grid placement below.
 
 Single page, `min-height: 100dvh`, max content width 1440px, side gutter `--s-5` (16px under 640px).

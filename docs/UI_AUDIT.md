@@ -171,3 +171,31 @@ and the tooltip explains holding/releasing. No behavior or control IDs changed.
 No live text is clipped; the only clipped label is deliberately screen-reader
 text. Source review and existing checks pass; actual pixel/pointer verification
 remains open because native computer access was previously rejected.
+
+
+## Simple companion mode
+
+Reviewed each design-law point for the new mode. The existing authored Billu SVG,
+provided fonts and palette remain the signature; the mode adds no new imagery,
+icons, decorative surfaces, default toggle knobs or motion. The plain text mode
+button stays visible beside Billu, is keyboard accessible and exposes its pressed
+state. One centered companion area replaces the dashboard columns, with deliberate
+12–24px gutters, the existing 48px microphone target and internal overflow on
+short desktop windows. Optional panels hide only because the user chooses this
+view, with no entrance animation or opacity gate. The character responds to
+existing live state and reduced-motion rules.
+
+Existing confirmation controls, countdown and coding feedback move into the
+companion area and move back when the user restores the dashboard. Their DOM
+identity and handlers are retained; simple mode cannot suppress approval or
+change policy. A mode toggle moves focus out of panels it is about to hide.
+Native preference IPC authenticates the main page, accepts only two fixed values
+and writes only its fixed preference file. Corrupt/missing preferences use the
+dashboard. Tests cover persisted mode, invalid preference values, retained live
+confirmation handlers and restoring the original control positions. Existing
+Python/Electron checks pass. Pixel alignment and real pointer checks remain open
+because native computer access was previously rejected.
+
+For this follow-up, two native Catbot inspection attempts timed out (30s and
+20s). The packaged fake-mode Electron startup still passed with renderer audio
+connected and system-speech completion. No pixel or pointer results are claimed.

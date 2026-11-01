@@ -12,6 +12,7 @@ const path = require("node:path");
 const fs = require("node:fs");
 const { startBackend, projectRoot } = require("./backend.cjs");
 const { Permissions } = require("./permissions.cjs");
+const { viewPreferences } = require("./view-preferences.cjs");
 const {
   trustedPage,
   allowedPermission,
@@ -151,6 +152,15 @@ async function start() {
     )
       throw new Error("Only Billu’s main window can request native access.");
   };
+  const view = viewPreferences(app.getPath("userData"));
+  ipcMain.handle("catbot:get-view-mode", (event) => {
+    authenticate(event);
+    return view.get();
+  });
+  ipcMain.handle("catbot:set-view-mode", (event, mode) => {
+    authenticate(event);
+    return view.set(mode);
+  });
   ipcMain.handle("catbot:permissions", (event) => {
     authenticate(event);
     return {

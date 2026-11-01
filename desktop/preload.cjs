@@ -3,6 +3,8 @@ contextBridge.exposeInMainWorld(
   "catbotDesktop",
   Object.freeze({
     platform: process.platform,
+    getViewMode: () => ipcRenderer.invoke("catbot:get-view-mode"),
+    setViewMode: (mode) => ipcRenderer.invoke("catbot:set-view-mode", mode),
     smoke: process.argv.includes("--catbot-smoke"),
     completeSetup: () => ipcRenderer.invoke("catbot:finish-onboarding"),
     permissions: () => ipcRenderer.invoke("catbot:permissions"),

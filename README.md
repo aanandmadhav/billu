@@ -148,6 +148,11 @@ background concurrency and generated counter logic have executable checks.
 
 ## Electron desktop app
 
+Use **Simple mode** beside Billu's name for just the companion and input area.
+Use **Full dashboard** to restore the activity panels and settings. The desktop
+app remembers this choice across restarts; browsers remember it for that site.
+Confirmation buttons and generated-app links remain available in simple mode.
+
 Catbot now has an Electron desktop shell. It starts its own authenticated Python
 backend on an available loopback port and stops it when the app quits. You do not
 need to run `--serve` separately.
