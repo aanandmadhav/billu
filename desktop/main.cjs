@@ -113,7 +113,11 @@ async function start() {
         return callback(false);
       if (backend.fake) return callback(false);
       try {
-        const status = await permissions.request("microphone");
+        // Capture may request the initial OS prompt, but only the explicit
+        // permission setup action should navigate away to System Settings.
+        const status = await permissions.request("microphone", {
+          openSettings: false,
+        });
         callback(["granted", "request-on-use"].includes(status.microphone));
       } catch {
         callback(false);

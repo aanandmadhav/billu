@@ -58,6 +58,14 @@ test("microphone permission prompts once; denied access opens settings", async (
   await permissions.request("microphone");
   assert.deepEqual(calls, ["microphone"]);
   status = "denied";
+  for (let attempt = 0; attempt < 2; attempt++) {
+    assert.equal(
+      (await permissions.request("microphone", { openSettings: false }))
+        .microphone,
+      "denied",
+    );
+  }
+  assert.deepEqual(calls, ["microphone"]);
   await permissions.request("microphone");
   assert.match(calls.at(-1), /Privacy_Microphone/);
   await assert.rejects(permissions.request("camera"));

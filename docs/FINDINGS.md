@@ -241,3 +241,14 @@ microphone disconnection stop capture explicitly.
 The full live `scripts.smoke_voice_pipeline` passed after the fix: real STT,
 Sarvam chat, Laya and TTS, with fake volume 40 and a 180524-byte reply WAV. No
 physical microphone or real volume action was used by the probe.
+
+
+## Talk control and denied microphone access
+
+The session media handler called the same permission helper as the explicit
+setup buttons. With a denied microphone, each getUserMedia attempt consequently
+opened the macOS microphone Settings pane. Capture requests now allow the initial
+OS prompt but never navigate to Settings; the explicit Enable microphone action
+retains that navigation. A regression check repeats denied capture requests and
+asserts there is no navigation before the explicit setup request. Restarting can
+apply a grant made in Settings, but cannot itself grant microphone access.

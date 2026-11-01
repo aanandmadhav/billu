@@ -29,7 +29,7 @@ class Permissions {
         : "not-required";
     return { microphone, accessibility, platform: this.platform };
   }
-  async request(kind) {
+  async request(kind, { openSettings = true } = {}) {
     if (!["microphone", "accessibility"].includes(kind))
       throw new Error("Unknown permission.");
     if (this.fake) return this.status();
@@ -39,14 +39,18 @@ class Permissions {
           this.systemPreferences.getMediaAccessStatus("microphone");
         if (status === "not-determined")
           await this.systemPreferences.askForMediaAccess("microphone");
-        else if (status !== "granted")
+        else if (status !== "granted" && openSettings)
           await this.shell.openExternal(PANES.microphone);
       } else {
         const trusted =
           this.systemPreferences.isTrustedAccessibilityClient(true);
         if (!trusted) await this.shell.openExternal(PANES.accessibility);
       }
-    } else if (this.platform === "win32" && kind === "microphone") {
+    } else if (
+      this.platform === "win32" &&
+      kind === "microphone" &&
+      openSettings
+    ) {
       await this.shell.openExternal("ms-settings:privacy-microphone");
     }
     return this.status();
