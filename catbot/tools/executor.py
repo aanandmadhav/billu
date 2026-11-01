@@ -1,8 +1,10 @@
 import hashlib
+import json
 
 from pydantic import ValidationError
 
 from catbot.contracts import GateToken, ToolResult
+from catbot.gate.keyword import instruction_like
 from catbot.gate.policy import policy_gate
 from catbot.tools.fake import FakeTools
 from catbot.tools.registry import validate
@@ -88,5 +90,10 @@ class Executor:
                 else "Tool arguments or local resources were invalid."
             )
             result = ToolResult(ok=False, summary=message[:400])
-        self.bus.publish(call.task_id, "result", **result.model_dump())
+        self.bus.publish(
+            call.task_id,
+            "result",
+            **result.model_dump(),
+            provenance_flag=instruction_like(result.summary + json.dumps(result.data or {})),
+        )
         return result

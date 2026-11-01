@@ -1,6 +1,6 @@
 import os
 import platform
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -15,8 +15,8 @@ class Settings:
     port: int = 8765
     sandbox: Path = ROOT / "sandbox"
     model_dir: Path = ROOT / "models/laya"
-    sarvam_key: str = ""
-    exa_key: str = ""
+    sarvam_key: str = field(default="", repr=False)
+    exa_key: str = field(default="", repr=False)
     os_name: str = platform.system().lower()
 
     @classmethod

@@ -273,6 +273,11 @@ def create_app(settings, *, runner=None):
                         {"type": "error", "message": "Invalid audio control message."}
                     )
                     continue
+                if not isinstance(message, dict):
+                    await ws.send_json(
+                        {"type": "error", "message": "Audio control must be a JSON object."}
+                    )
+                    continue
                 kind = message.get("type")
                 if kind == "played":
                     audio.acknowledge(ws, message.get("speech_id"))

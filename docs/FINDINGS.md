@@ -140,3 +140,24 @@ No microphone or real volume was accessed. UI/browser microphone permission and
 actual loudspeaker playback remain unverified because computer use is unavailable.
 The JS resampler passed constant-signal, 100 ms frame size and final-padding checks
 at both 44.1 kHz and 48 kHz input rates (`node scripts/check_pcm.mjs`).
+
+## P5 rehearsal and final verification
+
+- `python -m scripts.seed_demo`: created three synthetic 2024-dated PNGs under
+  `sandbox/screenshots/`, with `.Trash/` also inside sandbox. Seeding executes via
+  `policy_gate`, a matching GateToken and an operator-only deterministic write_code
+  handler. It preserves existing files. No actual desktop screenshots are captured.
+- `python -m scripts.rehearse`: **5/5 beats, three consecutive passes**, plus unmute.
+  These are accelerated fake rehearsals (about 1.3 s each), not three physical
+  90-second voice performances. No desktop or external service calls occur.
+- `python -m scripts.smoke_shell`: real confined mkdir, echo redirect, explicitly
+  confirmed move and read passed inside a fresh `sandbox/shell-probe-*` folder.
+- Final `pytest -q`: **71 passed**. `ruff check .`: clean. All four UI JS modules
+  parsed with `node --check`; PCM checks passed at 44.1 and 48 kHz.
+- HTML audit: no duplicate IDs, no missing JS control targets, no external asset URLs.
+- Shell deliberately uses zsh `-f -c` instead of login `-lc`, so user startup files
+  cannot run commands or write outside sandbox. Model text is parsed, confined and
+  safely reconstructed before reaching zsh. No shell=True is used.
+- Laya now warms one inference before setting readiness. The weights and exact
+  question/state templates remain unchanged. Keyword fallback operates during warm-up.
+- Full design-law review and verification limits: `docs/UI_AUDIT.md`.

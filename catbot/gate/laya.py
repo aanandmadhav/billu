@@ -58,7 +58,13 @@ class LayaGate:
             os.environ["USE_TF"] = "0"
             import laya
 
-            self.agent = laya.Agent(str(self.model_dir))
+            agent = laya.Agent(str(self.model_dir))
+            # Warm the first inference before advertising readiness; no weights are modified.
+            agent.predict(
+                'Request: lower volume\nAction: set_volume {"action": "down"}',
+                {"risk_tier": RISK_TIER, "verify_call": VERIFY_CALL},
+            )
+            self.agent = agent
         except Exception as exc:  # noqa: BLE001 - keyword fallback is a required availability boundary
             self.failed = True
             logger.warning("Laya unavailable (%s); using keyword gate", type(exc).__name__)

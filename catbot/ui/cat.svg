@@ -1,40 +1,41 @@
 <svg id="cat" data-state="sleeping" viewBox="0 0 320 320" role="img" aria-label="Billu is sleeping" xmlns="http://www.w3.org/2000/svg">
+ <style>.eyes-open,.eyes-narrow,.eyes-happy,.orbit,.paw-stop,.sparkle,.wave-ring,.tape{display:none}</style>
  <g class="wave-ring" fill="none" stroke="currentColor"><circle cx="160" cy="168" r="118"/><circle cx="160" cy="168" r="140"/></g>
- <g class="tail"><path d="M211 264 C283 289 294 218 269 215 C251 210 254 240 245 243" fill="none" stroke="var(--c-muted)" stroke-width="21" stroke-linecap="round"/><path d="M267 219q7 12 1 22" fill="none" stroke="var(--c-surface-2)" stroke-width="10"/></g>
- <g class="body" fill="var(--c-surface-2)" stroke="var(--c-muted)" stroke-width="2.2" stroke-linejoin="round">
+ <g class="tail"><path d="M211 264 C283 289 294 218 269 215 C251 210 254 240 245 243" fill="none" stroke="var(--c-muted, #A9A4B8)" stroke-width="21" stroke-linecap="round"/><path d="M267 219q7 12 1 22" fill="none" stroke="var(--c-surface-2, #1C1A27)" stroke-width="10"/></g>
+ <g class="body" fill="var(--c-surface-2, #1C1A27)" stroke="var(--c-muted, #A9A4B8)" stroke-width="2.2" stroke-linejoin="round">
   <path d="M116 204q-29 26-29 68l-7 10 15-1-5 12 20-4q48 16 104-1l19 4-8-13 11-1q-3-50-29-77Z"/>
-  <path d="M131 233q-13 23-11 54m67-54q13 23 12 54" fill="none" stroke="var(--c-line-strong)"/>
+  <path d="M131 233q-13 23-11 54m67-54q13 23 12 54" fill="none" stroke="var(--c-line-strong, rgba(244, 239, 230, 0.16))"/>
   <path d="M103 288q12-12 32 0m49 0q18-12 33-1" fill="none"/>
-  <path d="m152 235-8 12 13-3 6 20 7-20 13 3-9-15" fill="var(--c-muted)" stroke="none"/>
+  <path d="m152 235-8 12 13-3 6 20 7-20 13 3-9-15" fill="var(--c-muted, #A9A4B8)" stroke="none"/>
  </g>
  <g class="head" stroke-linejoin="round" stroke-linecap="round">
-  <g class="ears" fill="var(--c-surface-2)" stroke="var(--c-muted)" stroke-width="2.2">
+  <g class="ears" fill="var(--c-surface-2, #1C1A27)" stroke="var(--c-muted, #A9A4B8)" stroke-width="2.2">
    <path class="ear-l" d="m96 117-3-56 19 7 3 11 9-6 28 32Z"/>
    <path class="ear-r" d="m183 98 39-39 8 60Z"/>
    <path d="m104 84 2 30 24-9m72-1 14-25 3 36" stroke="var(--stage-color)" fill="none" stroke-width="4"/>
   </g>
-  <path class="face" d="M106 103q54-28 109 7l11 25-5 13 13 11-12 3 9 12-14 3q-6 40-57 47-50-2-62-43l-15-5 10-11-12-8 13-14q-2-23 12-40Z" fill="var(--c-surface-2)" stroke="var(--c-muted)" stroke-width="2.2"/>
-  <g class="cap" stroke="var(--c-catnip)" stroke-width="2.2">
-   <path d="M105 104q5-47 54-47 42-2 60 42l-17 8q-43-22-97 7Z" fill="var(--c-surface-1)"/>
-   <path d="M105 103q36-12 62-1l-7 15q-44-7-71 3-12-8 16-17Z" fill="var(--c-catnip)"/>
+  <path class="face" d="M106 103q54-28 109 7l11 25-5 13 13 11-12 3 9 12-14 3q-6 40-57 47-50-2-62-43l-15-5 10-11-12-8 13-14q-2-23 12-40Z" fill="var(--c-surface-2, #1C1A27)" stroke="var(--c-muted, #A9A4B8)" stroke-width="2.2"/>
+  <g class="cap" stroke="var(--c-catnip, #C6FF3D)" stroke-width="2.2">
+   <path d="M105 104q5-47 54-47 42-2 60 42l-17 8q-43-22-97 7Z" fill="var(--c-surface-1, #14121C)"/>
+   <path d="M105 103q36-12 62-1l-7 15q-44-7-71 3-12-8 16-17Z" fill="var(--c-catnip, #C6FF3D)"/>
    <path d="M163 60q20 11 26 35" fill="none" opacity=".4"/>
-   <path d="m190 80 7 1 2 9-8-2z" fill="var(--c-catnip)"/>
+   <path d="m190 80 7 1 2 9-8-2z" fill="var(--c-catnip, #C6FF3D)"/>
   </g>
-  <g class="brows" fill="none" stroke="var(--c-muted)" stroke-width="3"><path d="m117 129 27 5m32 0 25-7"/></g>
-  <g class="eyes-open" fill="var(--stage-color)"><ellipse cx="133" cy="149" rx="12" ry="10"/><ellipse cx="185" cy="149" rx="12" ry="10"/><g class="pupils" fill="var(--c-bg)"><ellipse cx="136" cy="150" rx="3" ry="8"/><ellipse cx="188" cy="150" rx="3" ry="8"/></g></g>
+  <g class="brows" fill="none" stroke="var(--c-muted, #A9A4B8)" stroke-width="3"><path d="m117 129 27 5m32 0 25-7"/></g>
+  <g class="eyes-open" fill="var(--stage-color)"><ellipse cx="133" cy="149" rx="12" ry="10"/><ellipse cx="185" cy="149" rx="12" ry="10"/><g class="pupils" fill="var(--c-bg, #0B0A10)"><ellipse cx="136" cy="150" rx="3" ry="8"/><ellipse cx="188" cy="150" rx="3" ry="8"/></g></g>
   <g class="eyes-closed" fill="none" stroke="var(--stage-color)" stroke-width="3"><path d="M120 149q13 10 25-1m28 0q14 10 25-1"/></g>
-  <g class="eyes-narrow" fill="none" stroke="var(--c-chili)" stroke-width="4"><path d="m120 145 25 5m29 0 25-5"/></g>
-  <g class="eyes-happy" fill="none" stroke="var(--c-catnip)" stroke-width="3"><path d="M120 151q12-16 25 0m29 0q12-16 25 0"/></g>
-  <g class="glasses" fill="none" stroke="var(--c-paper)" stroke-width="3"><path d="m110 138 40 2-2 24-34-2Zm59 2 40-2-4 24-34 2Zm-19 4h19m-65-6 7 1m98-1 10-2"/><path d="m118 144 8-1m52 2 9-2" opacity=".45" stroke-width="1.5"/></g>
+  <g class="eyes-narrow" fill="none" stroke="var(--c-chili, #FF5468)" stroke-width="4"><path d="m120 145 25 5m29 0 25-5"/></g>
+  <g class="eyes-happy" fill="none" stroke="var(--c-catnip, #C6FF3D)" stroke-width="3"><path d="M120 151q12-16 25 0m29 0q12-16 25 0"/></g>
+  <g class="glasses" fill="none" stroke="var(--c-paper, #F4EFE6)" stroke-width="3"><path d="m110 138 40 2-2 24-34-2Zm59 2 40-2-4 24-34 2Zm-19 4h19m-65-6 7 1m98-1 10-2"/><path d="m118 144 8-1m52 2 9-2" opacity=".45" stroke-width="1.5"/></g>
   <path class="nose" d="m151 177 17-1-8 9Z" fill="var(--stage-color)"/>
-  <path class="mouth" d="m160 186 1 8q9 7 17-3m-17 3q-7 6-13-1" fill="none" stroke="var(--c-muted)" stroke-width="2.3"/>
-  <g class="whiskers" fill="none" stroke="var(--c-muted)" stroke-width="1.6"><path d="m117 179-38-6m37 14-38 4m122-12 39-8m-37 16 37 3"/></g>
-  <path d="m199 173-3 7m-3-8-3 7" stroke="var(--c-paper)" stroke-width="1.5"/>
-  <g class="tape"><path d="m139 188 44-2 2 17-45 2Z" fill="var(--c-paper)"/><path d="m145 193 33-1m-29 7 25-1" stroke="var(--c-muted)" stroke-width="1"/></g>
+  <path class="mouth" d="m160 186 1 8q9 7 17-3m-17 3q-7 6-13-1" fill="none" stroke="var(--c-muted, #A9A4B8)" stroke-width="2.3"/>
+  <g class="whiskers" fill="none" stroke="var(--c-muted, #A9A4B8)" stroke-width="1.6"><path d="m117 179-38-6m37 14-38 4m122-12 39-8m-37 16 37 3"/></g>
+  <path d="m199 173-3 7m-3-8-3 7" stroke="var(--c-paper, #F4EFE6)" stroke-width="1.5"/>
+  <g class="tape"><path d="m139 188 44-2 2 17-45 2Z" fill="var(--c-paper, #F4EFE6)"/><path d="m145 193 33-1m-29 7 25-1" stroke="var(--c-muted, #A9A4B8)" stroke-width="1"/></g>
  </g>
- <g class="headphones" fill="var(--c-surface-1)" stroke="var(--c-cyan)" stroke-width="2.2"><path d="M115 206q-4 40 45 42 48-3 47-41l-9 4q-2 29-38 29-34-1-36-29Z"/><rect x="107" y="205" width="21" height="32" rx="8" transform="rotate(-15 118 220)"/><rect x="194" y="205" width="21" height="32" rx="8" transform="rotate(15 204 220)"/><path d="m113 213 2 15m91-14-2 15" opacity=".5"/></g>
- <g class="paw-stop" stroke="var(--c-muted)" stroke-width="2" fill="var(--c-surface-2)"><path d="M219 241q25 14 37-10l5-19q2-12-7-11-2-12-10-7-8-9-13 1-12-4-12 7-7 2-6 11Z"/><ellipse cx="239" cy="220" rx="9" ry="8" fill="var(--c-chili)" stroke="none"/></g>
- <g class="zzz" fill="var(--c-muted)" font-family="var(--font-display)"><text x="234" y="89" font-size="18" transform="rotate(10 234 89)">z</text><text x="255" y="65" font-size="23" transform="rotate(10 255 65)">z</text></g>
+ <g class="headphones" fill="var(--c-surface-1, #14121C)" stroke="var(--c-cyan, #5EE6EB)" stroke-width="2.2"><path d="M115 206q-4 40 45 42 48-3 47-41l-9 4q-2 29-38 29-34-1-36-29Z"/><rect x="107" y="205" width="21" height="32" rx="8" transform="rotate(-15 118 220)"/><rect x="194" y="205" width="21" height="32" rx="8" transform="rotate(15 204 220)"/><path d="m113 213 2 15m91-14-2 15" opacity=".5"/></g>
+ <g class="paw-stop" stroke="var(--c-muted, #A9A4B8)" stroke-width="2" fill="var(--c-surface-2, #1C1A27)"><path d="M219 241q25 14 37-10l5-19q2-12-7-11-2-12-10-7-8-9-13 1-12-4-12 7-7 2-6 11Z"/><ellipse cx="239" cy="220" rx="9" ry="8" fill="var(--c-chili, #FF5468)" stroke="none"/></g>
+ <g class="zzz" fill="var(--c-muted, #A9A4B8)" font-family="var(--font-display)"><text x="234" y="89" font-size="18" transform="rotate(10 234 89)">z</text><text x="255" y="65" font-size="23" transform="rotate(10 255 65)">z</text></g>
  <g class="orbit" fill="var(--stage-color)"><circle cx="73" cy="118" r="3"/><circle cx="249" cy="125" r="3"/><circle cx="230" cy="50" r="3"/></g>
- <g class="sparkle" fill="var(--c-catnip)"><path d="m70 102 4 9 9 4-9 4-4 9-4-9-9-4 9-4Zm177 44 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/></g>
+ <g class="sparkle" fill="var(--c-catnip, #C6FF3D)"><path d="m70 102 4 9 9 4-9 4-4 9-4-9-9-4 9-4Zm177 44 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/></g>
 </svg>

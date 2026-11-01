@@ -52,8 +52,9 @@ class VoiceSession:
 
     async def cancel(self):
         self.closed = True
-        if self.task and not self.task.done():
-            self.task.cancel()
+        if self.task:
+            if not self.task.done():
+                self.task.cancel()
             await asyncio.gather(self.task, return_exceptions=True)
 
     async def _run(self):
